@@ -6,6 +6,19 @@ const reDue          = /due:(\d{4}-\d{2}-\d{2})/,
     rePriority     = /(\([A-Z]\))/,
     reCompleted    = /^(x .*)/;
 
+    var scheduledDayRegex = /([a-zA-Z]+:)((?:today)|(?:tomorrow)|(?:monday)|(?:tuesday)|(?:wednesday)|(?:thursday)|(?:friday)|(?:saturday)|(?:sunday)|([0-9]+|one|two|three|four|five|six|seven|eight|nine)-?(day|week|month|year)s?)/ig;
+    var days = ["sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"];
+    var digitValues = ["", "one","two","three","four","five","six","seven","eight","nine"];
+    var timeUnitsInMs = {
+      millisecond: 1,
+      second: 1000,
+      minute: 60000,
+      hour: 3600000,
+      day: 86400000,
+      week: 604800000,
+      month: 2419200000,
+      year: 29030400000
+    };
 var options;
 var actionInput = document.querySelector("#actioninput");
 var todolist = document.querySelector("#todolist");
@@ -122,11 +135,37 @@ function setEventListeners() {
       });
 }
 
+function convertKeyValueDays(text) {
+    scheduledDayRegex.lastIndex = 0;
+    return (typeof text !== 'undefined') ? text.replace(scheduledDayRegex,replaceFunct) : '';
+  }
+
+function replaceFunct(match,p1,p2, p3,p4) {
+    var params = [match,p1,p2,p3,p4];
+    if(typeof params[3] !== 'undefined' && typeof params[4] !== 'undefined') {
+        multiplier = digitValues.indexOf(params[3]);
+        dateFound = new Date(Date.now() + (multiplier * timeUnitsInMs[params[4]]));
+        return params[1] + dateFound.toISOString().substring(0,10);
+    } else if(params[2] == 'today') {
+        return params[1] + new Date(Date.now()).toISOString().substring(0,10);
+    } else if(params[2] == 'tomorrow') {
+        return params[1] + new Date(Date.now() + timeUnitsInMs["day"]).toISOString().substring(0,10);
+    } else {
+        var dayIndex = days.indexOf(params[2].toLowerCase());
+        if(dayIndex >= 0) {
+        var dayDiff = dayIndex - new Date(Date.now()).getDay();
+        var daysTill = dayDiff >= 0 ? dayDiff : 7 + dayDiff;
+        return params[1] + new Date(Date.now() + (daysTill * timeUnitsInMs["day"])).toISOString().substring(0,10);
+        }
+        return params[0];
+    }
+}
+
 function addTodo(text) {
+    text = convertKeyValueDays(text);
     let item = document.createElement("li");
     item.appendChild(document.createTextNode(text));
     todolist.appendChild(item);
-    message.innerHTML = text;
     item.addEventListener("click", function(event) {
         toggleCompleteTodo(this);
     });
