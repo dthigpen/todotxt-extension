@@ -1,0 +1,44 @@
+{
+
+    "description": "A keyboard driven to-do list app with the todo.txt methodology in mind.",
+    "manifest_version": 2,
+    "name": "todotxt",
+    "version": "1.0",
+    "homepage_url": "https://github.com/mdn/webextensions-examples/tree/master/beastify",
+    "icons": {
+        "48": "icons/check_box_black_48dp.png"
+      },
+  
+    "permissions": [
+      "tabs",
+      "contextMenus",
+      "storage"
+    ],
+  
+    "browser_action": {
+      "default_icon": "icons/check_box_black_48dp.png",
+      "theme_icons": [{
+          "light": "icons/check_box_white_48dp.png",
+          "dark": "icons/check_box_black_48dp.png",
+          "size": 48
+      }],
+      "default_title": "todotxt",
+      "default_popup": "popup/todolist.html"
+    },
+  
+    "commands": {
+      "_execute_browser_action" : {
+        "suggested_key": {
+          "default": "Ctrl+Shift+L"
+        },
+        "description": "Open the todo list"
+      }
+    },
+
+    "options_ui": {
+      "page": "options/options.html",
+      "browser_style": true
+  }
+
+  }
+  

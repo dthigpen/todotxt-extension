@@ -1,0 +1,36 @@
+<!DOCTYPE <!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Options</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        form input {
+           display: block;
+        }
+    </style>
+</head>
+<body>
+    <h2>Keyboard Shortcuts</h2>
+    <form>
+        <label for="browserAction">Open to-do list</label>
+        <input type="text" id="browserAction" autocomplete="off">
+
+        <label for="keyComplete">Complete Key</label>
+        <input pattern="[a-zA-Z]" type="text" name="keyComplete" id="keyComplete" autocomplete="off">
+
+        <label for="keyEdit">Edit Key</label>
+        <input pattern="[a-zA-Z]" type="text" name="keyEdit" id="keyEdit" autocomplete="off">
+
+        <button type="submit" id="update">Save</button>
+        <button id="reset">Reset</button>
+    </form>
+    <h2>Other Options</h2>
+    <form>
+        <label for="deleteTodos">Local Todo Options</label>
+        <button id="deleteTodos">Delete All</button>
+    </form>
+        <script src="options.js"></script>
+</body>
+</html>

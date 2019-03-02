@@ -1,0 +1,93 @@
+html, body {
+    width: 374px;
+    font-family: 'Roboto', sans-serif;
+    font-weight: 300;
+}
+
+body {
+    padding: 0 4px;
+}
+
+body ol {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+}
+body li {
+    padding: 4px 0;
+    overflow-wrap: normal;
+}
+
+body li:nth-child(odd) {
+    background-color: white;
+    text-decoration-style: none;
+}
+
+body li:nth-child(even) {
+    background-color: #f9f9fa;
+    text-decoration-style: none;
+}
+
+#actioninput {
+    width: 100%;
+    font-family: 'Roboto', sans-serif;
+    font-weight: 300;
+    padding: 4px;
+}
+
+li input {
+    display: inline;
+}
+
+
+ol li.selected {
+    background-color: #d4f5ff;
+}
+.hidden {
+    display: none;
+}
+
+.message {
+    color: #4F8A10;
+    background-color: #DFF2BF;
+    margin: 2px;
+    padding: 4px;
+    border-radius: 4px;
+}
+
+.info {
+    color: #00529B;
+    background-color: #BDE5F8;
+}
+.success {
+    color: #4F8A10;
+    background-color: #DFF2BF;
+}
+.warning {
+    color: #9F6000;
+    background-color: #FEEFB3;
+}
+.error {
+    color: #D8000C;
+    background-color: #FFD2D2;
+}
+
+/*  SYNTAX HIGHLIGHTING */
+.color-project {
+    color:#A1E46D;
+}
+.color-context{
+    color:#aaa;
+    font-style: italic; 
+}
+.color-kvpair {
+    color:#E46D8A;
+    font-weight: 400;
+}
+.color-priority{
+    color:#597EA7;
+}
+.color-completed {
+    text-decoration: line-through;
+    color: #838B8B;
+}
