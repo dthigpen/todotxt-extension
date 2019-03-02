@@ -4,27 +4,66 @@ const reDue          = /due:(\d{4}-\d{2}-\d{2})/,
     reProject      =  /(\+[a-zA-Z0-9]+)/g,
     reContext      = /(@[a-zA-Z]+)/g,
     rePriority     = /(\([A-Z]\))/,
-    reCompleted    = /^(x .*)/g;
+    reCompleted    = /^(x .*)/;
 
+var options;
 var actionInput = document.querySelector("#actioninput");
 var todolist = document.querySelector("#todolist");
 var message = document.querySelector("#message-box");
 
+loadOptions();
 setEventListeners();
 loadTodos();
 sortTodos();
+updateBadgeText();
 
-function loadTodos() {
-    browser.storage.local.get("items")
+function updateBadgeText() {
+    fetchLocalTodos()
+    .then(texts => {
+        let counter = 0;
+        let badgeText = "";
+        for(let i = 0; i < texts.length; i++) {
+            if(!reCompleted.test(texts[i]) && reDue.exec(texts[i]) != null) {
+                counter += 1;
+            }
+        }
+        badgeText = counter > 0 ? counter + "" : "";
+        browser.browserAction.setBadgeText({text: badgeText});
+    })
+    .catch(err => {
+        console.error(err);
+    });
+}
+
+function loadOptions() {
+    browser.storage.local.get("options")
+    .then(obj => {
+        options = obj.options;
+    })
+    .catch(err => {
+        console.error(err);
+    });
+}
+
+function fetchLocalTodos() {
+    return browser.storage.local.get("items")
     .then(todos => {
         if(typeof todos !== "undefined") {
             let texts = todos.items;
             if(typeof texts !== "undefined") {
-                for(let i = 0; i < texts.length; i++) {
-                    addTodo(texts[i]);
-                }
+                return texts;
+            } else {
+                return [];
             }
-            message.innerHTML = texts;
+        }
+    });
+}
+
+function loadTodos() {
+    fetchLocalTodos()
+    .then(texts => {
+        for(let i = 0; i < texts.length; i++) {
+            addTodo(texts[i]);
         }
     })
     .catch(err => {
@@ -53,6 +92,8 @@ function saveTodos() {
             console.log(err);
         });
     }
+
+    updateBadgeText();
 }
 
 function reset() {
@@ -89,7 +130,6 @@ function addTodo(text) {
     item.addEventListener("click", function(event) {
         toggleCompleteTodo(this);
     });
-
     sortTodos();
 }
 

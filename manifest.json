@@ -12,7 +12,8 @@
     "permissions": [
       "tabs",
       "contextMenus",
-      "storage"
+      "storage",
+      "notifications"
     ],
   
     "browser_action": {
