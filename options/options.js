@@ -60,10 +60,12 @@ async function updateUI() {
         shortcuts[shortcutOptions[i].id].key = shortcutOptions[i].value;
     }
     await browser.storage.sync.set(options);
-    await browser.commands.update({
-      name: commandName,
-      shortcut: document.querySelector('#browserAction').value
-    });
+    
+    // commands.update not in Firefox v57 :(
+    // await browser.commands.update({
+    //   name: commandName,
+    //   shortcut: document.querySelector('#browserAction').value
+    // });
   }
   
   /**
@@ -88,7 +90,8 @@ async function updateUI() {
     let options = await fetchOptions();
     options.options.shortcuts = shortcuts;
     await browser.storage.sync.set(options);
-    await browser.commands.reset(commandName);
+    // commands.update not in Firefox v57 :(
+    // await browser.commands.reset(commandName);
   }
   
   async function clearLocalTodos() {
