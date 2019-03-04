@@ -114,6 +114,8 @@ function reset() {
     browser.storage.local.clear();
 }
 function setEventListeners() {
+    document.body.onkeyup = itemNavigation;
+
     actionInput.addEventListener("keyup", function(event) {
         // Number 13 is the "Enter" key on the keyboard
         if (event.keyCode === 13 && this.value.trim().length > 0) {
@@ -298,7 +300,9 @@ function performSyntaxHighlighting() {
 
 // Keyboard navigation of tasks
 var itemSelected;
-document.body.onkeyup = function(e) {
+
+
+function itemNavigation(e) {
     var key = e.keyCode ? e.keyCode : e.which;
     var UP_ARROW = 38,
         DOWN_ARROW = 40,
@@ -321,7 +325,26 @@ document.body.onkeyup = function(e) {
             itemSelected.classList.remove('selected');
             itemSelected = null;
         } else if(key == 'D'.charCodeAt(0)) {
+            var prev = itemSelected.previousElementSibling;
+            var next = itemSelected.nextElementSibling;
             deleteTodo(itemSelected);
+            
+            if(prev !== null && prev.parentNode.id === 'todolist') {
+                itemSelected = prev;
+                itemSelected.classList.add('selected');
+            } else if(next !== null && next.parentNode.id === 'todolist') {
+                itemSelected = next;
+                itemSelected.classList.add('selected');
+            } else {
+                itemSelected = document.querySelector('#todolist li');
+                if(itemSelected != null) {
+                    itemSelected.classList.add('selected');
+                } else {
+                    actionInput.focus();
+                }
+
+            }
+
         }
     } else if(key === ESCAPE) {
         if(itemSelected) {
