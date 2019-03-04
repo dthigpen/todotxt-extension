@@ -1,43 +1,27 @@
 const commandName = '_execute_browser_action';
-
-browser.storage.onChanged = updateUI;
-
-async function initOptions(force=false) {
-    let options = await browser.storage.sync.get("options");
-    if(force || typeof options === "undefined" || !options.hasOwnProperty("options")) {
-        let options = {
-            options: {
-                shortcuts: {},
-                notifications: {},
-                other: {}
-            }
-        };
-        console.log("Reseting options");
-        await browser.storage.sync.set(options);
-        await resetShortcuts();
+const optionsDefault = {
+    options: {
+        browserAction: "Ctrl+Shift+L",
+        keyComplete: "C",
+        keyEdit: "E",
+        keyDelete: "D",
+        keyNew: "N",
     }
 }
-/**
- * Update the UI: set the value of the shortcut textbox.
- */
+browser.storage.onChanged = updateUI;
+
+setEventListeners();
+
 async function updateUI() {
     // fetch options values from storage and populate options elements
     let options = await fetchOptions();
-    if(typeof options !== "undefined" && typeof options.options !== "undefined") {
-        let shortcuts = options.options.shortcuts;
-        for(var prop in shortcuts) {
-            // skip loop if the property is from prototype
-            if (!shortcuts.hasOwnProperty(prop)) continue;
-            let foundKey = shortcuts[prop].key;
-            if(typeof foundKey === "undefined" || foundKey.length === 0) {
-                document.querySelector("#" + prop).value = shortcuts[prop].default;
-            } else {
-                document.querySelector("#" + prop).value = foundKey;
-            }
-        }
-    } else {
-        // reset the options structure
-        initOptions(true);
+    // 1. Get all option settings on the page
+    // 2. Populate the values with the stored option value
+    // 3. Or get value from optionsDefault structure
+    var optionElements = document.querySelectorAll("form input");
+    for(let i = 0; i < optionElements.length; i++) {
+        let val = options.options[optionElements[i].id];
+        optionElements[i].value = typeof val !== "undefined" ? val : optionsDefault.options[optionElements[i].id];
     }
    
     let commands = await browser.commands.getAll();
@@ -47,17 +31,13 @@ async function updateUI() {
       }
     }
 }
-  
-  /**
-   * Update the shortcut based on the value in the textbox.
-   */
+  // Update only the shortcut options
   async function updateShortcuts(e) {
     e.preventDefault();  
     let options = await fetchOptions();
-    let shortcuts = options.options.shortcuts;
     let shortcutOptions = document.querySelectorAll(".shortcutOptions input");
     for(let i = 0; i < shortcutOptions.length; i++) {
-        shortcuts[shortcutOptions[i].id].key = shortcutOptions[i].value;
+        options.options[shortcutOptions[i].id] = shortcutOptions[i].value;
     }
     await browser.storage.sync.set(options);
     
@@ -72,44 +52,45 @@ async function updateUI() {
    * Reset the shortcut and update the textbox.
    */
   async function resetShortcuts(e) {
-    e.preventDefault();
-    let shortcuts = {
-        browserAction: {
-            default: "Ctrl+Shift+L",
-            key: "Ctrl+Shift+L"
-        },
-        keyComplete: {
-            default: "C",
-            key: "C"
-        },
-        keyEdit: {
-            default: "E",
-            key: "E"
-        },
-    };
     let options = await fetchOptions();
-    options.options.shortcuts = shortcuts;
+    let shortcutOptions = document.querySelectorAll(".shortcutOptions input");
+    for(let i = 0; i < shortcutOptions.length; i++) {
+        options.options[shortcutOptions[i].id] = optionsDefault.options[shortcutOptions[i].id];
+    }
     await browser.storage.sync.set(options);
+    e.preventDefault();  
     // commands.update not in Firefox v57 :(
     // await browser.commands.reset(commandName);
   }
   
+  async function resetEverything() {
+    clearLocalTodos();
+    initOptions();
+  }
+
   async function clearLocalTodos() {
       await browser.storage.sync.remove("items");
   }
 
+  async function initOptions() {
+    await browser.storage.sync.clear();
+    let options = fetchOptions(); // returns default since empty
+    await browser.storage.sync.set(options);
+}
+
   async function fetchOptions() {
       let options = await browser.storage.sync.get("options");
+      if(typeof options === "undefined" || !options.hasOwnProperty("options")) {
+          options["options"] = optionsDefault;
+      }
       return options;
   }
-  /**
-   * Update the UI when the page loads.
-   */
-  document.addEventListener('DOMContentLoaded', updateUI);
+
+  function setEventListeners() {
+    document.addEventListener('DOMContentLoaded', updateUI);
   
-  document.querySelector('#update').addEventListener('click', updateShortcuts);
-  document.querySelector('#reset').addEventListener('click', resetShortcuts);
-  document.querySelector('#deleteTodos').addEventListener('click', clearLocalTodos);
-  document.querySelector('#resetAll').addEventListener('click', () => initOptions(true));
-  
-  initOptions();
+    document.querySelector('#update').addEventListener('click', updateShortcuts);
+    document.querySelector('#reset').addEventListener('click', resetShortcuts);
+    document.querySelector('#deleteTodos').addEventListener('click', clearLocalTodos);
+    document.querySelector('#resetAll').addEventListener('click', resetEverything);  
+  }

@@ -6,25 +6,33 @@ const reDue          = /due:(\d{4}-\d{2}-\d{2})/,
     rePriority     = /(\([A-Z]\))/,
     reCompleted    = /^(x .*)/;
 
-    var scheduledDayRegex = /([a-zA-Z]+:)((?:today)|(?:tomorrow)|(?:monday)|(?:tuesday)|(?:wednesday)|(?:thursday)|(?:friday)|(?:saturday)|(?:sunday)|([0-9]+|one|two|three|four|five|six|seven|eight|nine)-?(day|week|month|year)s?)/ig;
-    var days = ["sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"];
-    var digitValues = ["", "one","two","three","four","five","six","seven","eight","nine"];
-    var timeUnitsInMs = {
-      millisecond: 1,
-      second: 1000,
-      minute: 60000,
-      hour: 3600000,
-      day: 86400000,
-      week: 604800000,
-      month: 2419200000,
-      year: 29030400000
-    };
-var options;
+var scheduledDayRegex = /([a-zA-Z]+:)((?:today)|(?:tomorrow)|(?:monday)|(?:tuesday)|(?:wednesday)|(?:thursday)|(?:friday)|(?:saturday)|(?:sunday)|([0-9]+|one|two|three|four|five|six|seven|eight|nine)-?(day|week|month|year)s?)/ig;
+var days = ["sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"];
+var digitValues = ["", "one","two","three","four","five","six","seven","eight","nine"];
+var timeUnitsInMs = {
+    millisecond: 1,
+    second: 1000,
+    minute: 60000,
+    hour: 3600000,
+    day: 86400000,
+    week: 604800000,
+    month: 2419200000,
+    year: 29030400000
+};
+const optionsDefault = {
+        browserAction: "Ctrl+Shift+L",
+        keyComplete: "C",
+        keyEdit: "E",
+        keyDelete: "D",
+        keyNew: "N",
+}
+var options = optionsDefault;
 var actionInput = document.querySelector("#actioninput");
 var todolist = document.querySelector("#todolist");
 var message = document.querySelector("#message-box");
 
-loadOptions();
+browser.storage.onChanged = fetchOptionsAsync;
+fetchOptionsAsync();
 setEventListeners();
 loadTodos();
 sortTodos();
@@ -48,13 +56,14 @@ function updateBadgeText() {
     });
 }
 
-function loadOptions() {
-    browser.storage.local.get("options")
-    .then(obj => {
-        options = obj.options;
-    })
-    .catch(err => {
-        console.error(err);
+function fetchOptionsAsync() {
+    browser.storage.sync.get("options")
+    .then(res => {
+        if(typeof res === "undefined" || !res.hasOwnProperty("options")) {
+            res["options"] = optionsDefault;
+        }
+        options = res.options;
+        return res.options;
     });
 }
 
@@ -82,7 +91,6 @@ function loadTodos() {
     .catch(err => {
         console.log(err);
     });
-    
 }
 
 function saveTodos() {
@@ -90,7 +98,6 @@ function saveTodos() {
         "items": [
         ]
     };
-    // let elements = document.querySelectorAll("#todolist li");
     let elements = todolist.children;
     if(typeof elements !== "undefined") {
         for(let i = 0; i < elements.length; i++) {
@@ -105,7 +112,6 @@ function saveTodos() {
             console.log(err);
         });
     }
-
     updateBadgeText();
 }
 
@@ -314,17 +320,18 @@ function itemNavigation(e) {
     }
     if(itemSelected && key >= 65 && key <= 90) {
         // todo item key shortcuts
-        if(key == 'C'.charCodeAt(0) || key == 'X'.charCodeAt(0)) {
+
+        if(key == options.keyComplete.charCodeAt(0)) {
             toggleCompleteTodo(itemSelected);
-        } else if(key == 'E'.charCodeAt(0)) {
+        } else if(key == options.keyEdit.charCodeAt(0)) {
             editTodo(itemSelected);
             itemSelected.classList.remove('selected');
             itemSelected = null;
-        } else if(key == 'N'.charCodeAt(0)) {
+        } else if(key == options.keyNew.charCodeAt(0)) {
             actionInput.focus();
             itemSelected.classList.remove('selected');
             itemSelected = null;
-        } else if(key == 'D'.charCodeAt(0)) {
+        } else if(key == options.keyDelete.charCodeAt(0)) {
             var prev = itemSelected.previousElementSibling;
             var next = itemSelected.nextElementSibling;
             deleteTodo(itemSelected);
@@ -342,7 +349,6 @@ function itemNavigation(e) {
                 } else {
                     actionInput.focus();
                 }
-
             }
 
         }

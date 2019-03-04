@@ -16,9 +16,15 @@
     <form class="shortcutOptions">
         <label for="browserAction">Open to-do list</label>
         <input type="text" id="browserAction" autocomplete="off" disabled>
-
+        
+        <label for="keyNew">New Todo Key</label>
+        <input pattern="[a-zA-Z]" type="text" name="keyNew" id="keyNew" autocomplete="off">
+        
         <label for="keyComplete">Complete Key</label>
         <input pattern="[a-zA-Z]" type="text" name="keyComplete" id="keyComplete" autocomplete="off">
+
+        <label for="keyDelete">Delete Key</label>
+        <input pattern="[a-zA-Z]" type="text" name="keyDelete" id="keyDelete" autocomplete="off">
 
         <label for="keyEdit">Edit Key</label>
         <input pattern="[a-zA-Z]" type="text" name="keyEdit" id="keyEdit" autocomplete="off">
@@ -27,12 +33,10 @@
         <button id="reset">Reset</button>
     </form>
     <h2>Other Options</h2>
-    <form>
-        <label for="deleteTodos">Local Todo Options</label>
-        <button id="deleteTodos">Delete All</button>
-        <label for="resetAll">Reset Everything</label>
-        <button id="resetAll">Reset</button>
-
+    <form class="otherOptions">
+        <button id="deleteTodos">Delete To-do items</button>
+        <br>
+        <button id="resetAll">Reset Everything</button>
     </form>
         <script src="options.js"></script>
 </body>
