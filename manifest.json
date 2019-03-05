@@ -6,7 +6,7 @@
     "version": "1.0.1",
     "homepage_url": "https://github.com/dthigpen/todotxt-extension",
     "icons": {
-        "48": "icons/check_box_black_48dp.png"
+        "48": "assets/icons/check_box_black_48dp.png"
       },
   
     "permissions": [
@@ -16,10 +16,10 @@
     ],
   
     "browser_action": {
-      "default_icon": "icons/check_box_black_48dp.png",
+      "default_icon": "assets/icons/check_box_black_48dp.png",
       "theme_icons": [{
-          "light": "icons/check_box_white_48dp.png",
-          "dark": "icons/check_box_black_48dp.png",
+          "light": "assets/icons/check_box_white_48dp.png",
+          "dark": "assets/icons/check_box_black_48dp.png",
           "size": 48
       }],
       "default_title": "todotxt",

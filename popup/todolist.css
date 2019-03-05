@@ -43,7 +43,7 @@ body li:nth-child(even) {
 
 .input-area {
     display: grid;
-    grid-template-columns: 1fr auto;
+    grid-template-columns: 1fr auto auto;
     grid-gap: 4px;
     padding-bottom: 4px;
 }
@@ -55,6 +55,10 @@ body li:nth-child(even) {
     border: 1px solid var(--gray);
     background: none;
     display: inline;
+}
+
+.input-area input {
+    padding: 4px;
 }
 
 ol li.selected {

@@ -28,6 +28,7 @@ const optionsDefault = {
 }
 const actionInput = document.querySelector("#actioninput");
 const actionInputBtn = document.querySelector("#actioninputBtn");
+const optionsBtn = document.querySelector("#optionsBtn");
 const todolist = document.querySelector("#todolist");
 const message = document.querySelector("#message-box");
 var options = optionsDefault;
@@ -124,6 +125,7 @@ function setEventListeners() {
     document.body.onkeyup = itemNavigation;
     actionInput.addEventListener("keyup", submitInput);
     actionInputBtn.addEventListener("click", parseActionInput);
+    optionsBtn.addEventListener("click", () => browser.runtime.openOptionsPage());
 }
 
 function submitInput(event) {
