@@ -6,6 +6,7 @@ const optionsDefault = {
         keyEdit: "E",
         keyDelete: "D",
         keyNew: "N",
+        keyFilter: "?",
     }
 }
 browser.storage.onChanged = updateUI;

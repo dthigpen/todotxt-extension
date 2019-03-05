@@ -25,6 +25,7 @@ const optionsDefault = {
         keyEdit: "E",
         keyDelete: "D",
         keyNew: "N",
+        keyFilter: "?",
 }
 const actionInput = document.querySelector("#actioninput");
 const actionInputBtn = document.querySelector("#actioninputBtn");
@@ -137,28 +138,59 @@ function submitInput(event) {
     if(actionInput.value.length === 0) {
         actionInput.removeAttribute("update");
         actionInputBtn.innerText = "Add";
+        removeFilter();
     }
 }
 
 function parseActionInput() {
+    let inputValue = actionInput.value.trim();
     if(actionInput.hasAttribute("update")) {
-        if(updateTodo(actionInput.value.trim(), actionInput.getAttribute("update"))) {
+        if(updateTodo(inputValue, actionInput.getAttribute("update"))) {
             // success
         } else {
             // Todo with this id is missing so create a new one
-            addTodo(actionInput.value.trim());
+            addTodo(inputValue);
         }
+    } else if(inputValue.charAt(0) == options.keyFilter) {
+        performFilter(inputValue.substring(1));
+        return;
     } else {
-        addTodo(actionInput.value.trim());
+        addTodo(inputValue);
     }
     actionInput.value = "";
-
     if(actionInput.value.length === 0) {
         actionInput.removeAttribute("update");
         actionInputBtn.innerText = "Add";
+        removeFilter();
     }
 }
 
+// Perform an AND filter where all todo items must meet all requirements in the filter
+function performFilter(filterText) {
+    let filters = filterText.split(" ");
+    let items = todolist.children;
+    actionInputBtn.innerText = "Filter";
+    filterText = convertKeyValueDays(filterText);
+    for(let i = 0; i < items.length; i++) {
+        items[i].classList.remove("hidden");
+        let isMatch = true;
+        for(let j = 0; isMatch && j < filters.length; j++) {
+            if(items[i].innerText.indexOf(filters[j]) == -1) {
+                items[i].classList.add("hidden");
+                isMatch = false;
+            }
+        }
+    }
+    
+
+}
+
+function removeFilter() {
+    let items = todolist.children;
+    for(let i = 0; i < items.length; i++) {
+        items[i].classList.remove("hidden");
+    }
+}
 function convertKeyValueDays(text) {
     scheduledDayRegex.lastIndex = 0;
     return (typeof text !== 'undefined') ? text.replace(scheduledDayRegex,replaceFunct) : '';
@@ -186,7 +218,6 @@ function replaceFunct(match,p1,p2, p3,p4) {
 }
 
 function addTodo(text) {
-    console.log(text);
     text = convertKeyValueDays(text);
     let item = document.createElement("li");
     item.appendChild(document.createTextNode(text));
