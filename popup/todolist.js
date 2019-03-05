@@ -259,6 +259,7 @@ function createTodoElement(text) {
 }
 
 function editTodoElement(item, editedText) {
+    editedText = convertKeyValueDays(editedText);
     let textElement = item.querySelector(".text");
     textElement.innerText = editedText;
     // return item;
