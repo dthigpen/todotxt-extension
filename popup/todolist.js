@@ -133,23 +133,42 @@ function setEventListeners() {
 function todoItemClicked(e) {
     let target = e.target;
     console.log(target);
-        if(target.classList.contains("completeTodo") && target.parentNode.parentNode.tagName.toLowerCase() === "li") {
-            toggleCompleteTodo(target.parentNode.parentNode);
-        } else if(target.classList.contains("editTodo") && target.parentNode.parentNode.tagName.toLowerCase() === "li") {
-            editTodo(target.parentNode.parentNode);
-        } else if(target.classList.contains("deleteTodo") && target.parentNode.parentNode.tagName.toLowerCase() === "li") {
-            deleteTodo(target.parentNode.parentNode);
-        }
-        e.stopPropagation();
+    if(target.classList.contains("completeTodo") && target.parentNode.parentNode.tagName.toLowerCase() === "li") {
+        toggleCompleteTodo(target.parentNode.parentNode);
+        hideActionForItems();
+    } else if(target.classList.contains("editTodo") && target.parentNode.parentNode.tagName.toLowerCase() === "li") {
+        editTodo(target.parentNode.parentNode);
+        hideActionForItems();
+    } else if(target.classList.contains("deleteTodo") && target.parentNode.parentNode.tagName.toLowerCase() === "li") {
+        deleteTodo(target.parentNode.parentNode);
+        hideActionForItems();
+    } else if(target.classList.contains("text") && target.parentNode.tagName.toLowerCase() === "li") {
+        showActionsForItem(target.parentNode);
+    }
+    e.stopPropagation();
+}
+
+function hideActionForItems() {
+    let items = todolist.children;
+    for(let i = 0; i < items.length; i++) {
+        items[i].classList.remove("showActions");
+    }
+}
+
+function showActionsForItem(item) {
+    hideActionForItems();
+    item.classList.add("showActions")
 }
 
 function submitInput(event) {
     event.preventDefault();
     // Number 13 is the "Enter" key on the keyboard
     if (event.keyCode === 13 && actionInput.value.trim().length > 0) {
+        hideActionForItems();
         parseActionInput();
     }
     if(actionInput.value.length === 0) {
+        hideActionForItems();
         actionInput.removeAttribute("update");
         actionInputBtn.innerText = "Add";
         removeFilter();
