@@ -134,6 +134,7 @@ function submitInput(event) {
     }
     if(actionInput.value.length === 0) {
         actionInput.removeAttribute("update");
+        actionInputBtn.innerText = "Add";
     }
 }
 
@@ -152,6 +153,7 @@ function parseActionInput() {
 
     if(actionInput.value.length === 0) {
         actionInput.removeAttribute("update");
+        actionInputBtn.innerText = "Add";
     }
 }
 
@@ -197,6 +199,7 @@ function editTodo(item) {
     actionInput.value = item.innerText;
     actionInput.setAttribute("update", item.id);
     actionInput.focus();
+    actionInputBtn.innerText = "Edit";
 }
 
 function updateTodo(text, index) {
