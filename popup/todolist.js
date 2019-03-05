@@ -71,7 +71,7 @@ function fetchOptionsAsync() {
 }
 
 function fetchLocalTodos() {
-    return browser.storage.local.get("items")
+    return browser.storage.sync.get("items")
     .then(todos => {
         if(typeof todos !== "undefined") {
             let texts = todos.items;
@@ -106,7 +106,7 @@ function saveTodos() {
         for(let i = 0; i < elements.length; i++) {
             todos.items.push(elements[i].innerText);
         }
-        browser.storage.local.set(todos)
+        browser.storage.sync.set(todos)
         .then(() => {
             // success
         })
@@ -120,13 +120,26 @@ function saveTodos() {
 
 function reset() {
     todolist.innerHTML = null;
-    browser.storage.local.clear();
+    browser.storage.sync.clear();
 }
 function setEventListeners() {
     document.body.onkeyup = itemNavigation;
     actionInput.addEventListener("keyup", submitInput);
     actionInputBtn.addEventListener("click", parseActionInput);
     optionsBtn.addEventListener("click", () => browser.runtime.openOptionsPage());
+    document.body.querySelector("#todolist").addEventListener("click", todoItemClicked);
+}
+
+function todoItemClicked(e) {
+    let target = e.target;
+        if(target.classList.contains("completeTodo") && target.parentNode.parentNode.tagName.toLowerCase() === "li") {
+            toggleCompleteTodo(target.parentNode.parentNode);
+        } else if(target.classList.contains("editTodo") && target.parentNode.parentNode.tagName.toLowerCase() === "li") {
+            editTodo(target.parentNode.parentNode);
+        } else if(target.classList.contains("deleteTodo") && target.parentNode.parentNode.tagName.toLowerCase() === "li") {
+            deleteTodo(target.parentNode.parentNode);
+        }
+        e.stopPropagation();
 }
 
 function submitInput(event) {
@@ -144,6 +157,9 @@ function submitInput(event) {
 
 function parseActionInput() {
     let inputValue = actionInput.value.trim();
+    if(inputValue.length == 0) {
+        return
+    }
     if(actionInput.hasAttribute("update")) {
         if(updateTodo(inputValue, actionInput.getAttribute("update"))) {
             // success
@@ -181,8 +197,6 @@ function performFilter(filterText) {
             }
         }
     }
-    
-
 }
 
 function removeFilter() {
@@ -217,14 +231,41 @@ function replaceFunct(match,p1,p2, p3,p4) {
     }
 }
 
-function addTodo(text) {
+function createTodoElement(text) {
     text = convertKeyValueDays(text);
     let item = document.createElement("li");
-    item.appendChild(document.createTextNode(text));
+    let textElement = document.createElement("div");
+    let actionsElement = document.createElement("div");
+    textElement.className = "text";
+    textElement.appendChild(document.createTextNode(text));
+    let completeBtn = document.createElement("button");
+    // completeBtn.className="completeTodo";
+    completeBtn.innerHTML = '<i class="fas fa-check"></i>';
+    let editBtn = document.createElement("button");
+    // editBtn.className = "editTodo";
+    editBtn.innerHTML = '<i class="fas fa-pencil-alt"></i>';
+    let deleteBtn = document.createElement("button");
+    // deleteBtn.className = "deleteTodo";
+    deleteBtn.innerHTML = '<i class="fas fa-trash-alt"></i>';
+    actionsElement.className = "actions";
+    // For some reason click listeners do not work when added to the buttons here
+    actionsElement.appendChild(completeBtn);
+    actionsElement.appendChild(editBtn);
+    actionsElement.appendChild(deleteBtn);
+    item.appendChild(textElement);
+    item.appendChild(actionsElement);
+    return item;
+}
+
+function editTodoElement(item, editedText) {
+    let textElement = item.querySelector(".text");
+    textElement.innerText = editedText;
+    // return item;
+}
+
+function addTodo(text) {
+    let item = createTodoElement(text);
     todolist.appendChild(item);
-    item.addEventListener("click", function(event) {
-        toggleCompleteTodo(this);
-    });
     sortTodos();
 }
 
@@ -241,7 +282,7 @@ function updateTodo(text, index) {
         let item = items[i];
         if(typeof item !== "undefined" && item != null) {
             if(item.id === index){
-                item.innerText = text.trim();
+                editTodoElement(item, text);
                 sortTodos();
                 return true;
             }   
@@ -256,9 +297,9 @@ function deleteTodo(item) {
 
 function toggleCompleteTodo(item) {
     if(reCompleted.test(item.innerText)) {
-        item.innerText = item.innerText.substring(2);
+        editTodoElement(item, item.innerText.substring(2));
     } else {
-        item.innerText = "x " + item.innerText;
+        editTodoElement(item, "x " + item.innerText);
     }
     sortTodos();
 }
@@ -341,7 +382,7 @@ function sortFunct(elementA, elementB) {
 }
 
 function performSyntaxHighlighting() {
-    var todoElements = document.querySelectorAll("#todolist li");
+    var todoElements = document.querySelectorAll("#todolist li .text");
     for (var i = 0; i < todoElements.length; ++i) {
         var str = todoElements[i].innerHTML.trim();
         parsed = str.replace(reCompleted, '<span class="color-completed">$1</span>');
