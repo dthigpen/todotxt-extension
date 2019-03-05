@@ -6,10 +6,10 @@ const reDue          = /due:(\d{4}-\d{2}-\d{2})/,
     rePriority     = /(\([A-Z]\))/,
     reCompleted    = /^(x .*)/;
 
-var scheduledDayRegex = /([a-zA-Z]+:)((?:today)|(?:tomorrow)|(?:monday)|(?:tuesday)|(?:wednesday)|(?:thursday)|(?:friday)|(?:saturday)|(?:sunday)|([0-9]+|one|two|three|four|five|six|seven|eight|nine)-?(day|week|month|year)s?)/ig;
-var days = ["sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"];
-var digitValues = ["", "one","two","three","four","five","six","seven","eight","nine"];
-var timeUnitsInMs = {
+const scheduledDayRegex = /([a-zA-Z]+:)((?:today)|(?:tomorrow)|(?:monday)|(?:tuesday)|(?:wednesday)|(?:thursday)|(?:friday)|(?:saturday)|(?:sunday)|([0-9]+|one|two|three|four|five|six|seven|eight|nine)-?(day|week|month|year)s?)/ig;
+const days = ["sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"];
+const digitValues = ["", "one","two","three","four","five","six","seven","eight","nine"];
+const timeUnitsInMs = {
     millisecond: 1,
     second: 1000,
     minute: 60000,
@@ -26,10 +26,11 @@ const optionsDefault = {
         keyDelete: "D",
         keyNew: "N",
 }
+const actionInput = document.querySelector("#actioninput");
+const actionInputBtn = document.querySelector("#actioninputBtn");
+const todolist = document.querySelector("#todolist");
+const message = document.querySelector("#message-box");
 var options = optionsDefault;
-var actionInput = document.querySelector("#actioninput");
-var todolist = document.querySelector("#todolist");
-var message = document.querySelector("#message-box");
 
 browser.storage.onChanged = fetchOptionsAsync;
 fetchOptionsAsync();
@@ -121,26 +122,37 @@ function reset() {
 }
 function setEventListeners() {
     document.body.onkeyup = itemNavigation;
+    actionInput.addEventListener("keyup", submitInput);
+    actionInputBtn.addEventListener("click", parseActionInput);
+}
 
-    actionInput.addEventListener("keyup", function(event) {
-        // Number 13 is the "Enter" key on the keyboard
-        if (event.keyCode === 13 && this.value.trim().length > 0) {
-            if(this.hasAttribute("update")) {
-                if(updateTodo(this.value.trim(), this.getAttribute("update"))) {
-                    // success
-                } else {
-                    // Todo with this id is missing so create a new one
-                    addTodo(this.value.trim());
-                }
-            } else {
-                addTodo(this.value.trim());
-            }
-            this.value = "";
+function submitInput(event) {
+    event.preventDefault();
+    // Number 13 is the "Enter" key on the keyboard
+    if (event.keyCode === 13 && actionInput.value.trim().length > 0) {
+        parseActionInput();
+    }
+    if(actionInput.value.length === 0) {
+        actionInput.removeAttribute("update");
+    }
+}
+
+function parseActionInput() {
+    if(actionInput.hasAttribute("update")) {
+        if(updateTodo(actionInput.value.trim(), actionInput.getAttribute("update"))) {
+            // success
+        } else {
+            // Todo with this id is missing so create a new one
+            addTodo(actionInput.value.trim());
         }
-        if(this.value.length === 0) {
-            this.removeAttribute("update");
-        }
-      });
+    } else {
+        addTodo(actionInput.value.trim());
+    }
+    actionInput.value = "";
+
+    if(actionInput.value.length === 0) {
+        actionInput.removeAttribute("update");
+    }
 }
 
 function convertKeyValueDays(text) {
@@ -170,6 +182,7 @@ function replaceFunct(match,p1,p2, p3,p4) {
 }
 
 function addTodo(text) {
+    console.log(text);
     text = convertKeyValueDays(text);
     let item = document.createElement("li");
     item.appendChild(document.createTextNode(text));

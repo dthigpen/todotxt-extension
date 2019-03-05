@@ -1,19 +1,21 @@
-<!DOCTYPE <!DOCTYPE html>
+<!DOCTYPE html>
 <html>
-<head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title>My To-do list</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i" rel="stylesheet"> 
-    <link rel="stylesheet" type="text/css" media="screen" href="todolist.css">
-</head>
-<body>
-    <div class="message hidden" id="message-box"></div>
-    <input type="text" placeholder="I need to..." name="actioninput" id="actioninput" autocomplete="off" autofocus/>
-    <ol id="todolist">
-        
-    </ol>
-    <script type="text/javascript" src="todolist.js"></script>
-</body>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <title>My To-do list</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i" rel="stylesheet"> 
+        <link rel="stylesheet" type="text/css" media="screen" href="todolist.css">
+    </head>
+    <body>
+        <div class="message hidden" id="message-box"></div>
+        <div class="input-area">
+            <input type="text" placeholder="I need to..." name="actioninput" id="actioninput" autocomplete="off" autofocus/>
+            <button id="actioninputBtn" type="submit">Add</button>
+        </div>
+        <ol id="todolist">     
+        </ol>
+        <script type="text/javascript" src="todolist.js"></script>
+    </body>
 </html>
