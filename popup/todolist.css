@@ -9,7 +9,41 @@
     --todo-color-keyval: #E46D8A;
     --todo-color-project: #A1E46D;
     --todo-color-context: #aaa;
+
+    --msg-info-color: rgb(0, 82, 155);
+    --msg-info-bg-color: rgb(189, 229, 248);
+    --msg-info-bg-color-alt: rgb(189, 229, 248, 0.50);
+    --msg-info-bg-color-alt2: rgb(189, 229, 248, 0.75);
+    --msg-success-color: rgb(79, 138, 16);
+    --msg-success-bg-color: rgb(223, 242, 191);
+    --msg-success-bg-color-alt: rgb(223, 242, 191, 0.50);
+    --msg-success-bg-color-alt2: rgb(223, 242, 191, 0.75);
+    --msg-warning-color: rgb(159, 96, 0);
+    --msg-warning-bg-color: rgb(254, 239, 179);
+    --msg-warning-bg-color-alt: rgb(254, 239, 179, 0.50);
+    --msg-warning-bg-color-alt2: rgb(254, 239, 179, 0.75);
+    --msg-error-color: rgb(216, 0, 12);
+    --msg-error-bg-color: rgb(255, 210, 210);
+    --msg-error-bg-color-alt: rgb(255, 210, 210, 0.50);
+    --msg-error-bg-color-alt2: rgb(255, 210, 210, 0.75);
 }
+
+/* .info {
+    color: #00529B;
+    background-color: #BDE5F8;
+}
+.success {
+    color: #4F8A10;
+    background-color: #DFF2BF;
+}
+.warning {
+    color: #9F6000;
+    background-color: #FEEFB3;
+}
+.error {
+    color: #D8000C;
+    background-color: #FFD2D2;
+} */
 
 html, body {
     width: 374px;
@@ -69,27 +103,30 @@ ol {
 }
 
 #todolist li div.actions button.completeTodo {
-    background-color: rgba(26, 138, 16, 0.5);
+    color: var(--msg-success-color);
+    background-color: var(--msg-success-bg-color-alt);
 }
 
 #todolist li div.actions button.completeTodo:hover {
-    background-color: rgba(26, 138, 16, 0.75);
+    background-color: var(--msg-success-bg-color-alt2);
 }
 
 #todolist li div.actions button.editTodo {
-    background-color: rgba(0, 83, 155, 0.5);
+    color: var(--msg-info-color);
+    background-color: var(--msg-info-bg-color-alt);
 }
 
 #todolist li div.actions button.editTodo:hover {
-    background-color: rgba(0, 83, 155, 0.75);
+    background-color: var(--msg-info-bg-color-alt2);
 }
 
 #todolist li div.actions button.deleteTodo {
-    background-color: rgba(216, 0, 11, 0.5);
+    color: var(--msg-error-color);
+    background-color: var(--msg-error-bg-color-alt);
 }
 
 #todolist li div.actions button.deleteTodo:hover {
-    background-color: rgba(216, 0, 11, 0.75);
+    background-color: var(--msg-error-bg-color-alt2);
 }
 
 #todolist li div.actions {

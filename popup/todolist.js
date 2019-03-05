@@ -132,6 +132,7 @@ function setEventListeners() {
 
 function todoItemClicked(e) {
     let target = e.target;
+    console.log(target);
         if(target.classList.contains("completeTodo") && target.parentNode.parentNode.tagName.toLowerCase() === "li") {
             toggleCompleteTodo(target.parentNode.parentNode);
         } else if(target.classList.contains("editTodo") && target.parentNode.parentNode.tagName.toLowerCase() === "li") {
@@ -239,13 +240,13 @@ function createTodoElement(text) {
     textElement.className = "text";
     textElement.appendChild(document.createTextNode(text));
     let completeBtn = document.createElement("button");
-    // completeBtn.className="completeTodo";
+    completeBtn.className="completeTodo";
     completeBtn.innerHTML = '<i class="fas fa-check"></i>';
     let editBtn = document.createElement("button");
-    // editBtn.className = "editTodo";
+    editBtn.className = "editTodo";
     editBtn.innerHTML = '<i class="fas fa-pencil-alt"></i>';
     let deleteBtn = document.createElement("button");
-    // deleteBtn.className = "deleteTodo";
+    deleteBtn.className = "deleteTodo";
     deleteBtn.innerHTML = '<i class="fas fa-trash-alt"></i>';
     actionsElement.className = "actions";
     // For some reason click listeners do not work when added to the buttons here
