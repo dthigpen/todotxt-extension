@@ -48,6 +48,8 @@ ol {
     padding: 4px 0;
     overflow-wrap: normal;
     position: relative;
+    transition: opacity 0.4s ease-in-out;
+    opacity: 0;
 }
 
 #todolist li div.actions {
@@ -81,7 +83,6 @@ ol {
     background: none;
     padding: 0;
     margin: 0;
-    /* transition: background-color 2000 linear; */
 }
 
 #todolist li div.actions button.completeTodo {
@@ -136,6 +137,11 @@ ol {
 
 .hidden {
     display: none;
+}
+
+#todolist li.show {
+    opacity: 1;
+    transition: opacity 0.4s ease-in-out;
 }
 
 .message {

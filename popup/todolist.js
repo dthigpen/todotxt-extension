@@ -305,6 +305,9 @@ function addTodo(text) {
     let item = createTodoElement(text);
     todolist.appendChild(item);
     sortTodos();
+    setTimeout(function() {
+        item.classList.add("show");
+    },10);
 }
 
 function editTodo(item) {
