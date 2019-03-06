@@ -29,13 +29,14 @@
 }
 
 html, body {
-    width: 374px;
+    /* max-width: 550px; */
+    width: 550px;
     font-family: 'Roboto', sans-serif;
     font-weight: 300;
 }
 
 body {
-    padding: 2px 4px;
+    padding: 2px 0;
 }
 
 ol {

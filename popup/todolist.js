@@ -27,11 +27,15 @@ const optionsDefault = {
         keyNew: "N",
         keyFilter: "?",
 }
+const htmlElem = document.querySelector("html");
+const bodyElem = document.querySelector("body");
 const actionInput = document.querySelector("#actioninput");
 const actionInputBtn = document.querySelector("#actioninputBtn");
 const optionsBtn = document.querySelector("#optionsBtn");
 const todolist = document.querySelector("#todolist");
 const message = document.querySelector("#message-box");
+const checkWindowWidthDelayMs = 100;
+const maxWidth = 550;
 var options = optionsDefault;
 
 browser.storage.onChanged = fetchOptionsAsync;
@@ -40,6 +44,18 @@ setEventListeners();
 loadTodos();
 sortTodos();
 updateBadgeText();
+
+function adjustWindowWidth() {
+    let inner = window.innerWidth;
+    console.log(inner);
+    if(inner < maxWidth) {
+        htmlElem.style.width = "100%";
+        bodyElem.style.width = "96%";
+        console.log("Fit for small displays");
+    } else {
+        console.log("Fit for large displays");
+    }
+}
 
 function updateBadgeText() {
     fetchLocalTodos()
@@ -123,6 +139,7 @@ function reset() {
     browser.storage.sync.clear();
 }
 function setEventListeners() {
+    document.addEventListener("DOMContentLoaded", () => setTimeout(adjustWindowWidth, checkWindowWidthDelayMs));
     document.body.onkeyup = itemNavigation;
     actionInput.addEventListener("keyup", submitInput);
     actionInputBtn.addEventListener("click", parseActionInput);
