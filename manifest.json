@@ -14,7 +14,10 @@
       "storage",
       "notifications"
     ],
-  
+    "background": {
+      "scripts": ["background/boarding.js"]
+    },
+
     "browser_action": {
       "default_icon": "assets/icons/check_box_black_48dp.png",
       "theme_icons": [{
