@@ -70,10 +70,6 @@ ol {
     display: none;
 }
 
-#todolist li:hover div.actions{
-    display: flex;
-}
-
 #todolist li.showActions div.actions{
     display: flex;
 }
@@ -88,35 +84,20 @@ ol {
     /* transition: background-color 2000 linear; */
 }
 
-#todolist li div.actions button:hover {
-    background: rgba(0, 0, 0, 0.08);
-}
-
 #todolist li div.actions button.completeTodo {
     color: var(--msg-success-color);
     background-color: var(--msg-success-bg-color-alt);
 }
 
-#todolist li div.actions button.completeTodo:hover {
-    background-color: var(--msg-success-bg-color-alt2);
-}
 
 #todolist li div.actions button.editTodo {
     color: var(--msg-info-color);
     background-color: var(--msg-info-bg-color-alt);
 }
 
-#todolist li div.actions button.editTodo:hover {
-    background-color: var(--msg-info-bg-color-alt2);
-}
-
 #todolist li div.actions button.deleteTodo {
     color: var(--msg-error-color);
     background-color: var(--msg-error-bg-color-alt);
-}
-
-#todolist li div.actions button.deleteTodo:hover {
-    background-color: var(--msg-error-bg-color-alt2);
 }
 
 #todolist li:nth-child(odd) {
@@ -200,4 +181,27 @@ ol {
 .color-completed {
     text-decoration: line-through;
     color: var(--todo-color-completed);
+}
+
+@media not all and (hover: none) {
+    #todolist li:hover div.actions{
+        display: flex;
+    }    
+
+    #todolist li div.actions button:hover {
+        background: rgba(0, 0, 0, 0.08);
+    }
+    
+    #todolist li div.actions button.completeTodo:hover {
+        background-color: var(--msg-success-bg-color-alt2);
+    }
+
+    #todolist li div.actions button.editTodo:hover {
+        background-color: var(--msg-info-bg-color-alt2);
+    }
+    
+    #todolist li div.actions button.deleteTodo:hover {
+        background-color: var(--msg-error-bg-color-alt2);
+    }
+    
 }
