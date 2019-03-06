@@ -3,7 +3,7 @@
     "description": "A keyboard driven to-do list app with the todo.txt methodology in mind.",
     "manifest_version": 2,
     "name": "todotxt",
-    "version": "1.0.1",
+    "version": "1.1.0",
     "homepage_url": "https://github.com/dthigpen/todotxt-extension",
     "icons": {
         "48": "assets/icons/check_box_black_48dp.png"
