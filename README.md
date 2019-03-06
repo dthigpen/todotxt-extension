@@ -4,15 +4,24 @@ A keyboard driven to-do list extension with the todo.txt methodology in mind.
 ### Features
  - Syntax highlighting
  - Multi-criteria sorting
+ - To-do filtering
  - Keyboard shortcuts for editing, completing, and viewing tasks
 
 ### How to use
  - Make sure the add-on is installed
  - Click on the add-on icon (checked checkbox) or use the keyboard shortcut ```Ctrl+Shift+L```
- - Add to-do items by typing them in the input box and pressing ```Enter```
- - Click on to-do items to complete them
- - Navigate the to-do items with the ↑,↓ arrow keys.
+ - Navigate to-do items with the keyboard shortcuts or mouse
  - View or change the keyboard shortcuts on the Options page (Firefox: ```Ctrl+Shift+A``` -> Add-on Options)
+### Keyboard Shortcuts
+| Action         | Key               |
+|----------------|-------------------|
+| Open extension | ```Alt+Shift+L``` |
+| Navigation     | ```↑```, ```↓```  |
+| New to-do      | ```N```           |
+| Complete to-do | ```C```           |
+| Edit to-do     | ```E```           |
+| Delete to-do   | ```D```           |
+| Filter Prefix  | ```?```           |
  
  ### Testing (Temporary Installation)
  1. Clone the repository to your machine.
