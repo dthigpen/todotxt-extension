@@ -13,6 +13,7 @@ A keyboard driven to-do list extension with the todo.txt methodology in mind.
  - Click on to-do items to complete them
  - Navigate the to-do items with the ↑,↓ arrow keys.
  - View or change the keyboard shortcuts on the Options page (Firefox: ```Ctrl+Shift+A``` -> Add-on Options)
+ 
  ### Testing (Temporary Installation)
  1. Clone the repository to your machine.
  2. Type ```about:debugging``` in the Firefox address bar.
@@ -22,3 +23,7 @@ A keyboard driven to-do list extension with the todo.txt methodology in mind.
 ### Full Installation
  - Download the latest .xpi or .zip in the Releases tab, and install from file under Firefox's Add-ons page
  - Or search the addons store for the latest published version, which may not be up to date.
+
+### Examples
+![ExampleUsage](https://github.com/dthigpen/todotxt-extension/blob/examples/examples/vid1.gif)
+![ExampleUsage](https://github.com/dthigpen/todotxt-extension/blob/examples/examples/img1.png)
