@@ -117,7 +117,7 @@ function saveTodos() {
         "items": [
         ]
     };
-    let elements = todolist.children;
+    let elements = getTodoListItems();
     if(typeof elements !== "undefined") {
         for(let i = 0; i < elements.length; i++) {
             todos.items.push(elements[i].innerText);
@@ -166,7 +166,7 @@ function todoItemClicked(e) {
 }
 
 function hideActionForItems() {
-    let items = todolist.children;
+    let items = getTodoListItems();
     for(let i = 0; i < items.length; i++) {
         items[i].classList.remove("showActions");
     }
@@ -221,7 +221,7 @@ function parseActionInput() {
 // Perform an AND filter where all todo items must meet all requirements in the filter
 function performFilter(filterText) {
     let filters = filterText.split(" ");
-    let items = todolist.children;
+    let items = getTodoListItems();
     actionInputBtn.innerText = "Filter";
     filterText = convertKeyValueDays(filterText);
     for(let i = 0; i < items.length; i++) {
@@ -237,7 +237,7 @@ function performFilter(filterText) {
 }
 
 function removeFilter() {
-    let items = todolist.children;
+    let items = getTodoListItems();
     for(let i = 0; i < items.length; i++) {
         items[i].classList.remove("hidden");
     }
@@ -271,6 +271,7 @@ function replaceFunct(match,p1,p2, p3,p4) {
 function createTodoElement(text) {
     text = convertKeyValueDays(text);
     let item = document.createElement("li");
+    item.className = "item";
     let textElement = document.createElement("div");
     let actionsElement = document.createElement("div");
     textElement.className = "text";
@@ -318,7 +319,7 @@ function editTodo(item) {
 }
 
 function updateTodo(text, index) {
-    let items = [...todolist.children];
+    let items = getTodoListItems();
     for (let i = 0; i < items.length; i++) {
         let item = items[i];
         if(typeof item !== "undefined" && item != null) {
@@ -356,8 +357,12 @@ function showMessage(text, type='success') {
     setTimeout(() => message.classList.add("hidden"), 2000);
 }
 
+function getTodoListItems() {
+    return document.querySelectorAll("#todolist li.item");
+}
+
 function sortTodos() {
-    var items = [...todolist.children];
+    var items = [...getTodoListItems()];
     items.sort(sortFunct);
     for (var i = 0; i < items.length; i++) {
         items[i].id = `item${i}`;
@@ -376,7 +381,7 @@ function sortFunct(elementA, elementB) {
 
     var textA = elementA.innerText;
     var textB = elementB.innerText;
-    
+
     var completedA = reCompleted.test(textA);
     var completedB = reCompleted.test(textB);
 
@@ -395,7 +400,7 @@ function sortFunct(elementA, elementB) {
     var contextB = reContext.exec(textB);
     contextB = contextB != null ?  contextB[1] : null;
 
-    // console.log(`Item: ${textA}\nCompleted: ${completedA} priority: ${priorityA} due: ${dueA} context: ${contextA}`);
+    console.log(`Item: ${textA}\nCompleted: ${completedA} priority: ${priorityA} due: ${dueA} context: ${contextA}`);
     
     // Sort by completion, then due date, then priority, then context
     
@@ -445,10 +450,7 @@ function itemNavigation(e) {
         DOWN_ARROW = 40,
         ENTER = 13,
         ESCAPE = 27;
-    if(todolist.children.length === 0) {
-        // showMessage("No tasks!", "error");
-        return false;
-    }
+
     if(itemSelected && key >= 65 && key <= 90) {
         // todo item key shortcuts
 
