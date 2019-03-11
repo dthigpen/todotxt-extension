@@ -26,7 +26,7 @@ const optionsDefault = {
         keyDelete: "D",
         keyNew: "N",
         keyFilter: "?",
-}
+};
 const htmlElem = document.querySelector("html");
 const bodyElem = document.querySelector("body");
 const actionInput = document.querySelector("#actioninput");
@@ -38,12 +38,85 @@ const checkWindowWidthDelayMs = 100;
 const maxWidth = 550;
 var options = optionsDefault;
 
+var sortingCriteria = [
+    {
+        name: "completed",
+        compare: function(textA, textB) {
+            resetRegexIndexes();
+            let completedA = reCompleted.test(textA);
+            let completedB = reCompleted.test(textB);
+            if(completedA && !completedB) return 1;
+            if(!completedA && completedB) return -1;
+            return 0;
+        }
+    },
+    {
+        name: "due",
+        compare: function(textA, textB) {
+            resetRegexIndexes();
+            var dueA = reDue.exec(textA);
+            dueA = dueA != null ?  new Date(dueA[1]) : null;
+            var dueB = reDue.exec(textB);
+            dueB = dueB != null ?  new Date(dueB[1]) : null;
+            if(dueA == null && dueB != null) return 1;
+            if(dueA != null && dueB == null) return -1;
+            if(dueA != null && dueB != null) {
+                if(dueA.getTime() > dueB.getTime()) return 1;
+                if(dueA.getTime() < dueB.getTime()) return -1;
+            }
+            return 0;
+        }
+    },
+    {
+        name: "priority",
+        compare: function(textA, textB) {
+            resetRegexIndexes();
+            var priorityA = rePriority.exec(textA);
+            priorityA = priorityA != null ? priorityA[1] : null;
+            var priorityB = rePriority.exec(textB);
+            priorityB = priorityB != null ? priorityB[1] : null
+            if(priorityA == null && priorityB != null) return 1;
+            if(priorityA != null && priorityB == null) return -1;
+            if(priorityA != null && priorityB != null) {
+                if(priorityA.valueOf() < priorityB.valueOf()) return -1;
+                if(priorityA.valueOf() > priorityB.valueOf()) return 1;
+            }
+            return 0;
+        }
+    },
+    {
+        name: "context",
+        compare: function(textA, textB) {
+            resetRegexIndexes();
+            var contextA = reContext.exec(textA);
+            contextA = contextA != null ?  contextA[1] : null;
+            var contextB = reContext.exec(textB);
+            contextB = contextB != null ?  contextB[1] : null;
+            if(contextA == null && contextB != null) return 1;
+            if(contextA != null && contextB == null) return -1;
+            if(contextA != null && contextB != null){
+                if(contextA.valueOf() > contextB.valueOf()) return 1;
+                if(contextA.valueOf() < contextB.valueOf()) return -1;
+            }
+            return 0;
+        }
+    }
+];
+
 browser.storage.onChanged = fetchOptionsAsync;
 fetchOptionsAsync();
 setEventListeners();
 loadTodos();
 sortTodos();
 updateBadgeText();
+
+function resetRegexIndexes() {
+    reCompleted.lastIndex = 0;
+    reDue.lastIndex = 0;
+    rePriority.lastIndex = 0;
+    reContext.lastIndex = 0;
+    reKeyVal.lastIndex = 0;
+}
 
 function adjustWindowWidth() {
     let inner = window.innerWidth;
@@ -373,56 +446,16 @@ function sortTodos() {
 }
 
 function sortFunct(elementA, elementB) {
-    reCompleted.lastIndex = 0;
-    reDue.lastIndex = 0;
-    rePriority.lastIndex = 0;
-    reContext.lastIndex = 0;
-    reKeyVal.lastIndex = 0;
-
+    resetRegexIndexes();
     var textA = elementA.innerText;
     var textB = elementB.innerText;
 
-    var completedA = reCompleted.test(textA);
-    var completedB = reCompleted.test(textB);
-
-    var priorityA = rePriority.exec(textA);
-    priorityA = priorityA != null ? priorityA[1] : null;
-    var priorityB = rePriority.exec(textB);
-    priorityB = priorityB != null ? priorityB[1] : null
-
-    var dueA = reDue.exec(textA);
-    dueA = dueA != null ?  new Date(dueA[1]) : null;
-    var dueB = reDue.exec(textB);
-    dueB = dueB != null ?  new Date(dueB[1]) : null;
-
-    var contextA = reContext.exec(textA);
-    contextA = contextA != null ?  contextA[1] : null;
-    var contextB = reContext.exec(textB);
-    contextB = contextB != null ?  contextB[1] : null;
-
-    console.log(`Item: ${textA}\nCompleted: ${completedA} priority: ${priorityA} due: ${dueA} context: ${contextA}`);
-    
-    // Sort by completion, then due date, then priority, then context
-    
-    if(completedA && !completedB) return 1;
-    if(!completedA && completedB) return -1;
-    if(dueA == null && dueB != null) return 1;
-    if(dueA != null && dueB == null) return -1;
-    if(dueA != null && dueB != null) {
-        if(dueA.getTime() > dueB.getTime()) return 1;
-        if(dueA.getTime() < dueB.getTime()) return -1;
-    }
-    if(priorityA == null && priorityB != null) return 1;
-    if(priorityA != null && priorityB == null) return -1;
-    if(priorityA != null && priorityB != null) {
-        if(priorityA.valueOf() < priorityB.valueOf()) return -1;
-        if(priorityA.valueOf() > priorityB.valueOf()) return 1;
-    }
-    if(contextA == null && contextB != null) return 1;
-    if(contextA != null && contextB == null) return -1;
-    if(contextA != null && contextB != null){
-        if(contextA.valueOf() > contextB.valueOf()) return 1;
-        if(contextA.valueOf() < contextB.valueOf()) return -1;
+    for(let i = 0; i < sortingCriteria.length; i++) {
+        let criteria = sortingCriteria[i];
+        let result = criteria.compare(textA, textB);
+        if(i < sortingCriteria.length - 1 && result != 0) {
+            return result;
+        }
     }
     return 0;
 }
