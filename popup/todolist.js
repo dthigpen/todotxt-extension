@@ -43,21 +43,25 @@ var sortingCriteria = [
         name: "completed",
         compare: function(textA, textB) {
             resetRegexIndexes();
-            let completedA = reCompleted.test(textA);
-            let completedB = reCompleted.test(textB);
+            let completedA = this.match(textA);
+            let completedB = this.match(textB);
+
             if(completedA && !completedB) return 1;
             if(!completedA && completedB) return -1;
             return 0;
+        },
+        regex: reCompleted,
+        match: function(text) {
+            return this.regex.test(text);
         }
     },
     {
         name: "due",
         compare: function(textA, textB) {
             resetRegexIndexes();
-            var dueA = reDue.exec(textA);
-            dueA = dueA != null ?  new Date(dueA[1]) : null;
-            var dueB = reDue.exec(textB);
-            dueB = dueB != null ?  new Date(dueB[1]) : null;
+            let dueA = this.match(textA);
+            let dueB = this.match(textB);
+
             if(dueA == null && dueB != null) return 1;
             if(dueA != null && dueB == null) return -1;
             if(dueA != null && dueB != null) {
@@ -65,16 +69,21 @@ var sortingCriteria = [
                 if(dueA.getTime() < dueB.getTime()) return -1;
             }
             return 0;
+        },
+        regex: reDue,
+        match: function(text) {
+            let dueA = this.regex.exec(text);
+            dueA = dueA != null ?  new Date(dueA[1]) : null;
+            return dueA;
         }
     },
     {
         name: "priority",
         compare: function(textA, textB) {
             resetRegexIndexes();
-            var priorityA = rePriority.exec(textA);
-            priorityA = priorityA != null ? priorityA[1] : null;
-            var priorityB = rePriority.exec(textB);
-            priorityB = priorityB != null ? priorityB[1] : null
+            var priorityA = this.match(textA);
+            var priorityB = this.match(textB);
+            
             if(priorityA == null && priorityB != null) return 1;
             if(priorityA != null && priorityB == null) return -1;
             if(priorityA != null && priorityB != null) {
@@ -82,16 +91,21 @@ var sortingCriteria = [
                 if(priorityA.valueOf() > priorityB.valueOf()) return 1;
             }
             return 0;
+        },
+        regex: rePriority,
+        match: function(text) {
+            var priorityA = this.regex.exec(text);
+            priorityA = priorityA != null ? priorityA[1] : null;
+            return priorityA;
         }
     },
     {
         name: "context",
         compare: function(textA, textB) {
             resetRegexIndexes();
-            var contextA = reContext.exec(textA);
-            contextA = contextA != null ?  contextA[1] : null;
-            var contextB = reContext.exec(textB);
-            contextB = contextB != null ?  contextB[1] : null;
+            var contextA = this.match(textA);
+            var contextB = this.match(textB);
+
             if(contextA == null && contextB != null) return 1;
             if(contextA != null && contextB == null) return -1;
             if(contextA != null && contextB != null){
@@ -99,6 +113,12 @@ var sortingCriteria = [
                 if(contextA.valueOf() < contextB.valueOf()) return -1;
             }
             return 0;
+        },
+        regex: reContext,
+        match: function(text) {
+            let contextA = this.regex.exec(text);
+            contextA = contextA != null ?  contextA[1] : null;
+            return  contextA;
         }
     }
 ];
