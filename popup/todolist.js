@@ -32,6 +32,8 @@ const htmlElem = document.querySelector("html");
 const bodyElem = document.querySelector("body");
 const actionInput = document.querySelector("#actioninput");
 const actionInputBtn = document.querySelector("#actioninputBtn");
+const fileImportBtn = document.querySelector("#fileImportBtn");
+const fileExportBtn = document.querySelector("#fileExportBtn");
 const optionsBtn = document.querySelector("#optionsBtn");
 const todolist = document.querySelector("#todolist");
 const message = document.querySelector("#message-box");
@@ -252,8 +254,18 @@ function setEventListeners() {
     document.body.onkeyup = itemNavigation;
     actionInput.addEventListener("keyup", submitInput);
     actionInputBtn.addEventListener("click", parseActionInput);
+    fileImportBtn.addEventListener("click", importFromFile);
+    fileExportBtn.addEventListener("click", exportToFile);
     optionsBtn.addEventListener("click", () => browser.runtime.openOptionsPage());
     document.body.querySelector("#todolist").addEventListener("click", todoItemClicked);
+}
+
+function importFromFile() {
+    console.log("Do import from file");
+}
+
+function exportToFile() {
+    console.log("Do export to file");
 }
 
 function todoItemClicked(e) {

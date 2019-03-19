@@ -118,7 +118,7 @@ ol {
 
 .input-area {
     display: grid;
-    grid-template-columns: 1fr auto auto;
+    grid-template-columns: 1fr repeat(4, auto);
     grid-gap: 4px;
     padding-bottom: 4px;
 }
