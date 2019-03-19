@@ -123,13 +123,24 @@ ol {
     padding-bottom: 4px;
 }
 
-.input-area input, .input-area button {
+.input-area input, .input-area button, .file-upload {
     font-size: inherit;
     font-family: inherit;
     font-weight: inherit;
     border: 1px solid var(--gray);
     background: none;
     display: inline;
+    cursor: pointer;
+}
+
+input[type="file"] {
+    display: none;
+}
+
+.file-upload {
+    display: flex;
+    align-items: center;
+    padding: 0 8px;
 }
 
 .input-area input {
