@@ -12,8 +12,10 @@
     "permissions": [
       "activeTab",
       "storage",
-      "notifications"
+      "notifications",
+      "downloads"
     ],
+    
     "background": {
       "scripts": ["background/boarding.js"]
     },

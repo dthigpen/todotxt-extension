@@ -39,6 +39,9 @@ const todolist = document.querySelector("#todolist");
 const message = document.querySelector("#message-box");
 const checkWindowWidthDelayMs = 100;
 const maxWidth = 550;
+const exportFileName = "todo.txt";
+const exportFileConflictAction = "overwrite";
+
 var options = optionsDefault;
 
 // Add method to access created keys
@@ -265,7 +268,17 @@ function importFromFile() {
 }
 
 function exportToFile() {
-    console.log("Do export to file");
+    sortTodos();
+    let items = getTodoListItems() || [];
+    let data = [];
+    for(let i = 0; i < items.length; i++) {
+        data.push(items[i].innerText + "\n");
+    }
+    let todofile = new Blob(data, {type: "text/plain"});
+    browser.downloads.download({
+        filename: exportFileName,
+        conflictAction: exportFileConflictAction,
+        url: URL.createObjectURL(todofile)});
 }
 
 function todoItemClicked(e) {
