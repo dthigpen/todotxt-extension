@@ -41,6 +41,7 @@ const checkWindowWidthDelayMs = 100;
 const maxWidth = 550;
 const exportFileName = "todo.txt";
 const exportFileConflictAction = "overwrite";
+const fileReader = new FileReader();
 
 var options = optionsDefault;
 
@@ -217,6 +218,7 @@ function fetchLocalTodos() {
 function loadTodos() {
     fetchLocalTodos()
     .then(texts => {
+        clearTodos();
         for(let i = 0; i < texts.length; i++) {
             addTodo(texts[i], false);
         }
@@ -226,24 +228,37 @@ function loadTodos() {
     });
 }
 
-function saveTodos() {
-    let todos = {
-        "items": [
-        ]
-    };
-    let elements = getTodoListItems();
-    if(typeof elements !== "undefined") {
-        for(let i = 0; i < elements.length; i++) {
-            todos.items.push(elements[i].innerText);
-        }
+function clearTodos() {
+    todolist.innerHTML = "";
+}
+
+function saveTodoStrings(texts, updateUIAfterSave = false) {
+    if(typeof texts !== "undefined" && texts.length > 0) {
+        let todos = {
+            "items": texts
+        };
         browser.storage.sync.set(todos)
         .then(() => {
             // success
+            if(updateUIAfterSave) {
+                loadTodos();
+            }
         })
         .catch(err => {
-            showMessage('Failed to load tasks', 'error');
+            showMessage('Failed to save tasks', 'error');
             console.log(err);
         });
+    }
+}
+
+function saveTodos() {
+    let items = [];
+    let elements = getTodoListItems();
+    if(typeof elements !== "undefined") {
+        for(let i = 0; i < elements.length; i++) {
+            items.push(elements[i].innerText);
+        }
+        saveTodoStrings(items);
     }
     updateBadgeText();
 }
@@ -257,14 +272,26 @@ function setEventListeners() {
     document.body.onkeyup = itemNavigation;
     actionInput.addEventListener("keyup", submitInput);
     actionInputBtn.addEventListener("click", parseActionInput);
-    fileImportBtn.addEventListener("click", importFromFile);
+    fileImportBtn.addEventListener("change", importFromFile, false);
     fileExportBtn.addEventListener("click", exportToFile);
     optionsBtn.addEventListener("click", () => browser.runtime.openOptionsPage());
     document.body.querySelector("#todolist").addEventListener("click", todoItemClicked);
+    fileReader.addEventListener("loadend", parseImportFile);
 }
 
 function importFromFile() {
     console.log("Do import from file");
+    let todofile = this.files[0];
+    if(todofile) {
+        fileReader.readAsText(todofile);
+    }
+}
+
+function parseImportFile(e) {
+    let text = e.srcElement.result || "";
+    let texts = text.split("\n");
+    saveTodoStrings(texts, true);
+    
 }
 
 function exportToFile() {
@@ -272,7 +299,10 @@ function exportToFile() {
     let items = getTodoListItems() || [];
     let data = [];
     for(let i = 0; i < items.length; i++) {
-        data.push(items[i].innerText + "\n");
+        let text = items[i].innerText + (i != items.length - 1 ? "\n" : "");
+        if(text.trim().length > 0) {
+            data.push(text);
+        }
     }
     let todofile = new Blob(data, {type: "text/plain"});
     browser.downloads.download({
