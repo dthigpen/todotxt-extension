@@ -1,3 +1,38 @@
-form input {
+form, .section {
+    display: grid;
+    grid-template-columns: auto auto;
+    grid-auto-flow: row;
+    justify-content: start;
+    align-items: center;
+    grid-column-gap: 10px;
+    grid-row-gap: 4px;
+}
+
+form .section {
+    /* grid-template-columns: 1fr 1fr;
+    grid-column-gap: 4px;
+    grid-row-gap: 2px; */
+    display: contents;
+}
+
+form input[type=checkbox] {
+    justify-self: start;
+}
+form button {
+    justify-self: start;
+}
+
+h1, h2, h3, .section {
+    grid-column-start: 1;
+    grid-column-end: span 2;
+}
+
+/* form input {
     display: block;
+} */
+
+.indent {
+    margin-left: 10px;
+    padding-left: 6px;
+    border-left: 2px solid lightgray;
 }

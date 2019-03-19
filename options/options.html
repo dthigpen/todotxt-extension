@@ -5,11 +5,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <title>Options</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <style>
-        form input {
-           display: block;
-        }
-    </style>
+    <link rel="stylesheet" type="text/css" media="screen" href="options.css">
 </head>
 <body>
     <h2>Keyboard Shortcuts</h2>
@@ -32,9 +28,58 @@
         <label for="keyFilter">Filter Key</label>
         <input type="text" name="keyFilter" id="keyFilter" autocomplete="off">
 
-        <button type="submit" id="update">Save</button>
-        <button id="reset">Reset</button>
+        <button class="reset" id="reset">Reset</button>
+        <button class="save" id="update">Save</button>
     </form>
+
+    <!-- <h2>Divider Settings: Context</h2>
+    <form class="dividerOptions">
+        <label for="dividerContextShowFirst">Max of type</label>
+        <input pattern="[0-9]+" type="text" id="dividerContextShowFirst" autocomplete="off">
+    </form>
+
+    <h2>Divider Settings: Due</h2>
+    <form class="dividerOptions">
+        <label for="dividerDueShowFirst">Max of type</label>
+        <input pattern="[0-9]+" type="text" id="dividerDueShowFirst" autocomplete="off">
+    </form>
+
+    <h2>Divider Settings: Completed</h2>
+    <form class="dividerOptions">
+        <label for="dividerCompletedShowFirst">Max of type</label>
+        <input pattern="[0-9]+" type="text" id="dividerCompletedShowFirst" autocomplete="off" disabled>
+    </form>
+    <h2 class="indent">Possible Values</h2>
+    <form class="indent dividerOptions">
+        <label for="dividerCompletedFalse">Value</label>
+        <input type="text" id="dividerCompletedFalse" value="false" disabled>
+        <label for="dividerCompletedFalseAlias">Alias</label>
+        <input type="text" id="dividerCompletedFalseAlias" autocomplete="off">
+        <label for="dividerCompletedFalseShow">Show</label>
+        <input type="checkbox" id="dividerCompletedFalseShow" autocomplete="off">
+        <label for="dividerCompletedFalseMinCount">Minimum Items</label>
+        <input pattern="[0-9]+" type="text" id="dividerCompletedFalseMinCount" autocomplete="off">
+        
+    </form>
+    <form class="indent dividerOptions">
+        <label for="dividerCompletedTrue">Value</label>
+        <input type="text" id="dividerCompletedTrue" value="true" disabled>
+        <label for="dividerCompletedTrueAlias">Alias</label>
+        <input type="text" id="dividerCompletedTrueAlias" autocomplete="off">
+        <label for="dividerCompletedTrueShow">Show</label>
+        <input type="checkbox" id="dividerCompletedTrueShow" autocomplete="off">
+        <label for="dividerCompletedTrueMinCount">Minimum Items</label>
+        <input pattern="[0-9]+" type="text" id="dividerCompletedTrueMinCount" autocomplete="off">
+        
+    </form>  -->
+
+    <form class="dividerOptions">
+        <label for="dividerShow">Show Dividers</label>
+        <input type="checkbox" name="dividerShow" id="dividerShow">
+        <button class="reset">Reset</button>
+        <button class="save">Save</button>
+    </form>
+
     <h2>Other Options</h2>
     <form class="otherOptions">
         <button id="deleteTodos">Delete To-do items</button>

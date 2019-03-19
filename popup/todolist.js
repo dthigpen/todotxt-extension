@@ -26,7 +26,8 @@ const optionsDefault = {
         keyDelete: "D",
         keyNew: "N",
         keyFilter: "?",
-}
+        dividerShow: false,
+};
 const htmlElem = document.querySelector("html");
 const bodyElem = document.querySelector("body");
 const actionInput = document.querySelector("#actioninput");
@@ -38,12 +39,119 @@ const checkWindowWidthDelayMs = 100;
 const maxWidth = 550;
 var options = optionsDefault;
 
+// Add method to access created keys
+if (!Object.keys) {
+    Object.keys = function (obj) {
+        var keys = [],
+            k;
+        for (k in obj) {
+            if (Object.prototype.hasOwnProperty.call(obj, k)) {
+                keys.push(k);
+            }
+        }
+        return keys;
+    };
+}
+
+var sortingCriteria = [
+    {
+        name: "completed",
+        compare: function(textA, textB) {
+            let completedA = this.match(textA);
+            let completedB = this.match(textB);
+
+            if(completedA && !completedB) return 1;
+            if(!completedA && completedB) return -1;
+            return 0;
+        },
+        regex: reCompleted,
+        match: function(text) {
+            resetRegexIndexes();
+            return this.regex.test(text);
+        }
+    },
+    {
+        name: "due",
+        compare: function(textA, textB) {
+            let dueA = this.match(textA);
+            let dueB = this.match(textB);
+
+            if(dueA == null && dueB != null) return 1;
+            if(dueA != null && dueB == null) return -1;
+            if(dueA != null && dueB != null) {
+                if(dueA.getTime() > dueB.getTime()) return 1;
+                if(dueA.getTime() < dueB.getTime()) return -1;
+            }
+            return 0;
+        },
+        regex: reDue,
+        match: function(text) {
+            resetRegexIndexes();
+            let dueA = this.regex.exec(text);
+            dueA = dueA != null ?  new Date(dueA[1]) : null;
+            return dueA;
+        }
+    },
+    {
+        name: "priority",
+        compare: function(textA, textB) {
+            var priorityA = this.match(textA);
+            var priorityB = this.match(textB);
+            
+            if(priorityA == null && priorityB != null) return 1;
+            if(priorityA != null && priorityB == null) return -1;
+            if(priorityA != null && priorityB != null) {
+                if(priorityA.valueOf() < priorityB.valueOf()) return -1;
+                if(priorityA.valueOf() > priorityB.valueOf()) return 1;
+            }
+            return 0;
+        },
+        regex: rePriority,
+        match: function(text) {
+            resetRegexIndexes();
+            var priorityA = this.regex.exec(text);
+            priorityA = priorityA != null ? priorityA[1] : null;
+            return priorityA;
+        }
+    },
+    {
+        name: "context",
+        compare: function(textA, textB) {
+            var contextA = this.match(textA);
+            var contextB = this.match(textB);
+
+            if(contextA == null && contextB != null) return 1;
+            if(contextA != null && contextB == null) return -1;
+            if(contextA != null && contextB != null){
+                if(contextA.valueOf() > contextB.valueOf()) return 1;
+                if(contextA.valueOf() < contextB.valueOf()) return -1;
+            }
+            return 0;
+        },
+        regex: reContext,
+        match: function(text) {
+            resetRegexIndexes();
+            let contextA = this.regex.exec(text);
+            contextA = contextA != null ?  contextA[1] : null;
+            return  contextA;
+        }
+    }
+];
+
 browser.storage.onChanged = fetchOptionsAsync;
 fetchOptionsAsync();
 setEventListeners();
 loadTodos();
 sortTodos();
 updateBadgeText();
+
+function resetRegexIndexes() {
+    reCompleted.lastIndex = 0;
+    reDue.lastIndex = 0;
+    rePriority.lastIndex = 0;
+    reContext.lastIndex = 0;
+    reKeyVal.lastIndex = 0;
+}
 
 function adjustWindowWidth() {
     let inner = window.innerWidth;
@@ -82,6 +190,7 @@ function fetchOptionsAsync() {
             res["options"] = optionsDefault;
         }
         options = res.options;
+        console.log(JSON.stringify(res.options));
         return res.options;
     });
 }
@@ -104,7 +213,7 @@ function loadTodos() {
     fetchLocalTodos()
     .then(texts => {
         for(let i = 0; i < texts.length; i++) {
-            addTodo(texts[i]);
+            addTodo(texts[i], false);
         }
     })
     .catch(err => {
@@ -117,7 +226,7 @@ function saveTodos() {
         "items": [
         ]
     };
-    let elements = todolist.children;
+    let elements = getTodoListItems();
     if(typeof elements !== "undefined") {
         for(let i = 0; i < elements.length; i++) {
             todos.items.push(elements[i].innerText);
@@ -149,7 +258,6 @@ function setEventListeners() {
 
 function todoItemClicked(e) {
     let target = e.target;
-    console.log(target);
     if(target.classList.contains("completeTodo") && target.parentNode.parentNode.tagName.toLowerCase() === "li") {
         toggleCompleteTodo(target.parentNode.parentNode);
         hideActionForItems();
@@ -166,7 +274,7 @@ function todoItemClicked(e) {
 }
 
 function hideActionForItems() {
-    let items = todolist.children;
+    let items = getTodoListItems();
     for(let i = 0; i < items.length; i++) {
         items[i].classList.remove("showActions");
     }
@@ -221,7 +329,7 @@ function parseActionInput() {
 // Perform an AND filter where all todo items must meet all requirements in the filter
 function performFilter(filterText) {
     let filters = filterText.split(" ");
-    let items = todolist.children;
+    let items = getTodoListItems();
     actionInputBtn.innerText = "Filter";
     filterText = convertKeyValueDays(filterText);
     for(let i = 0; i < items.length; i++) {
@@ -237,7 +345,7 @@ function performFilter(filterText) {
 }
 
 function removeFilter() {
-    let items = todolist.children;
+    let items = getTodoListItems();
     for(let i = 0; i < items.length; i++) {
         items[i].classList.remove("hidden");
     }
@@ -252,17 +360,17 @@ function replaceFunct(match,p1,p2, p3,p4) {
     if(typeof params[3] !== 'undefined' && typeof params[4] !== 'undefined') {
         multiplier = digitValues.indexOf(params[3]);
         dateFound = new Date(Date.now() + (multiplier * timeUnitsInMs[params[4]]));
-        return params[1] + dateFound.toISOString().substring(0,10);
+        return params[1] + dateToString(dateFound)
     } else if(params[2] == 'today') {
-        return params[1] + new Date(Date.now()).toISOString().substring(0,10);
+        return params[1] + dateToString(new Date(Date.now()));
     } else if(params[2] == 'tomorrow') {
-        return params[1] + new Date(Date.now() + timeUnitsInMs["day"]).toISOString().substring(0,10);
+        return params[1] + dateToString(new Date(Date.now() + timeUnitsInMs["day"]));
     } else {
         var dayIndex = days.indexOf(params[2].toLowerCase());
         if(dayIndex >= 0) {
         var dayDiff = dayIndex - new Date(Date.now()).getDay();
         var daysTill = dayDiff >= 0 ? dayDiff : 7 + dayDiff;
-        return params[1] + new Date(Date.now() + (daysTill * timeUnitsInMs["day"])).toISOString().substring(0,10);
+        return params[1] + dateToString(new Date(Date.now() + (daysTill * timeUnitsInMs["day"])));
         }
         return params[0];
     }
@@ -271,6 +379,7 @@ function replaceFunct(match,p1,p2, p3,p4) {
 function createTodoElement(text) {
     text = convertKeyValueDays(text);
     let item = document.createElement("li");
+    item.className = "item";
     let textElement = document.createElement("div");
     let actionsElement = document.createElement("div");
     textElement.className = "text";
@@ -298,16 +407,18 @@ function editTodoElement(item, editedText) {
     editedText = convertKeyValueDays(editedText);
     let textElement = item.querySelector(".text");
     textElement.innerText = editedText;
-    // return item;
 }
 
-function addTodo(text) {
+function addTodo(text, saveAfterAdd = true) {
     let item = createTodoElement(text);
     todolist.appendChild(item);
     sortTodos();
     setTimeout(function() {
         item.classList.add("show");
     },10);
+    if(saveAfterAdd) {
+        saveTodos();
+    }
 }
 
 function editTodo(item) {
@@ -317,14 +428,17 @@ function editTodo(item) {
     actionInputBtn.innerText = "Edit";
 }
 
-function updateTodo(text, index) {
-    let items = [...todolist.children];
+function updateTodo(text, index, saveAfterUpdate = true) {
+    let items = getTodoListItems();
     for (let i = 0; i < items.length; i++) {
         let item = items[i];
         if(typeof item !== "undefined" && item != null) {
             if(item.id === index){
                 editTodoElement(item, text);
                 sortTodos();
+                if(saveAfterUpdate) {
+                    saveTodos();
+                }
                 return true;
             }   
         }
@@ -336,13 +450,16 @@ function deleteTodo(item) {
     sortTodos();
 }
 
-function toggleCompleteTodo(item) {
+function toggleCompleteTodo(item, saveAfterUpdate = true) {
     if(reCompleted.test(item.innerText)) {
         editTodoElement(item, item.innerText.substring(2));
     } else {
         editTodoElement(item, "x " + item.innerText);
     }
     sortTodos();
+    if(saveAfterUpdate) {
+        saveTodos();
+    }
 }
 
 function showMessage(text, type='success') {
@@ -356,70 +473,139 @@ function showMessage(text, type='success') {
     setTimeout(() => message.classList.add("hidden"), 2000);
 }
 
+function getTodoListItems() {
+    return document.querySelectorAll("#todolist li.item");
+}
+
+function createDividerElement(text) {
+    let item = document.createElement("li");
+    item.className = "divider";
+    let textElement = document.createElement("div");
+    textElement.className = "text";
+    textElement.innerHTML = '<i class="fas fa-angle-down"></i><i>  </i>';
+    textElement.appendChild(document.createTextNode(text));
+    item.appendChild(textElement);
+    return item;
+}
+
+function removeDividers() {
+    let dividers = document.querySelectorAll("#todolist li.divider");
+    for(let i = 0; i < dividers.length; i++) {
+        dividers[i].parentNode.removeChild(dividers[i]);
+    }
+}
+
+function insertDividers(itemsNodeList) {
+    let items = [...itemsNodeList];
+    let dividerValues = {};
+    const maxDividersOfType = 5;
+    let itemsWithDividers = {};
+
+    for(let i = 0; i < sortingCriteria.length; i++) {
+        var criteria = sortingCriteria[i];
+        // ex. criteria = "due" or "completed"
+        // create or reference criteria name
+        dividerValues[criteria.name] = dividerValues[criteria.name] || {};
+        dividerValues[criteria.name]["values"] = dividerValues[criteria.name]["values"] || {};
+
+        // loop through items to find matches of this criteria
+        for(let j = 0; j < items.length; j++) {
+            let item = items[j];
+            
+            // create or reference a value for that criteria name
+            let valueForCriteria = criteria.match(item.innerText);
+            
+            if(valueForCriteria == null) {
+                continue;
+            }
+            if(valueForCriteria instanceof Date) {
+                valueForCriteria = dateToString(valueForCriteria);
+
+            }
+            if(valueForCriteria !== "") {
+                // if under maximum dividers of this type then create or access this divider name
+                if(Object.keys(dividerValues[criteria.name]["values"]).length < maxDividersOfType) {
+                    dividerValues[criteria.name]["values"][valueForCriteria] = dividerValues[criteria.name]["values"][valueForCriteria] || {items: [], show: true, minCount: 2, alias: ""};
+                    // add the item to the list if it doesn't contain it already
+                    if(dividerValues[criteria.name]["values"][valueForCriteria].items.indexOf(item.id) < 0) {
+                        dividerValues[criteria.name]["values"][valueForCriteria].items.push(item.id);
+                    }                   
+                }
+                
+            }
+        }
+    }
+    // Special Settings
+    dividerValues["completed"] = dividerValues["completed"] || {};
+    dividerValues["completed"]["values"] = dividerValues["completed"]["values"] || {};
+    dividerValues["completed"]["values"]["true"] = dividerValues["completed"]["values"]["true"] || {};
+    dividerValues["completed"]["values"]["false"] = dividerValues["completed"]["values"]["false"] || {};
+    dividerValues["completed"]["values"]["false"]["alias"] = "Incomplete";
+    dividerValues["completed"]["values"]["true"].show = true;
+    dividerValues["completed"]["values"]["true"]["alias"] = "Complete";
+    dividerValues["completed"]["values"]["true"].minCount = 1;
+
+    // console.log(JSON.stringify(dividerValues));
+
+    // create dividers for categories if needed
+    // First loop through divider categories
+    // Then loop through the different values that that attribute can take on
+    // Then view ids of items that have that same attribute value
+    for(let i = 0; i < sortingCriteria.length; i++) {
+        var criteria = sortingCriteria[i];
+        let criteriaDividers = dividerValues[criteria.name];
+        let criteriaValueKeys = Object.keys(criteriaDividers["values"]);
+        for(let j = 0; j < criteriaValueKeys.length; j++) {
+            let dividerInfo = criteriaDividers["values"][criteriaValueKeys[j]];
+            dividerInfo.items = dividerInfo.items || [];
+            if(dividerInfo.show && dividerInfo.items.length >= dividerInfo.minCount) {
+                let dividerElement = createDividerElement(dividerInfo.alias != "" ? dividerInfo.alias : criteriaValueKeys[j]);
+                let topElement = document.getElementById(dividerInfo.items[0]);
+                topElement.insertAdjacentElement("beforebegin", dividerElement);
+                dividerInfo.items.forEach(itemId => {
+                    itemsWithDividers[itemId] = true;
+                });
+                setTimeout(function() {
+                    dividerElement.classList.add("show");
+                },10);
+            }
+        }
+    }
+}
+
 function sortTodos() {
-    var items = [...todolist.children];
+    removeDividers();
+    var items = [...getTodoListItems()];
     items.sort(sortFunct);
     for (var i = 0; i < items.length; i++) {
         items[i].id = `item${i}`;
         items[i].parentNode.appendChild(items[i]);
     }
-    saveTodos();
     performSyntaxHighlighting();
+    if(options.dividerShow === true)
+        insertDividers(items);
 }
 
 function sortFunct(elementA, elementB) {
-    reCompleted.lastIndex = 0;
-    reDue.lastIndex = 0;
-    rePriority.lastIndex = 0;
-    reContext.lastIndex = 0;
-    reKeyVal.lastIndex = 0;
-
+    resetRegexIndexes();
     var textA = elementA.innerText;
     var textB = elementB.innerText;
-    
-    var completedA = reCompleted.test(textA);
-    var completedB = reCompleted.test(textB);
 
-    var priorityA = rePriority.exec(textA);
-    priorityA = priorityA != null ? priorityA[1] : null;
-    var priorityB = rePriority.exec(textB);
-    priorityB = priorityB != null ? priorityB[1] : null
-
-    var dueA = reDue.exec(textA);
-    dueA = dueA != null ?  new Date(dueA[1]) : null;
-    var dueB = reDue.exec(textB);
-    dueB = dueB != null ?  new Date(dueB[1]) : null;
-
-    var contextA = reContext.exec(textA);
-    contextA = contextA != null ?  contextA[1] : null;
-    var contextB = reContext.exec(textB);
-    contextB = contextB != null ?  contextB[1] : null;
-
-    // console.log(`Item: ${textA}\nCompleted: ${completedA} priority: ${priorityA} due: ${dueA} context: ${contextA}`);
-    
-    // Sort by completion, then due date, then priority, then context
-    
-    if(completedA && !completedB) return 1;
-    if(!completedA && completedB) return -1;
-    if(dueA == null && dueB != null) return 1;
-    if(dueA != null && dueB == null) return -1;
-    if(dueA != null && dueB != null) {
-        if(dueA.getTime() > dueB.getTime()) return 1;
-        if(dueA.getTime() < dueB.getTime()) return -1;
-    }
-    if(priorityA == null && priorityB != null) return 1;
-    if(priorityA != null && priorityB == null) return -1;
-    if(priorityA != null && priorityB != null) {
-        if(priorityA.valueOf() < priorityB.valueOf()) return -1;
-        if(priorityA.valueOf() > priorityB.valueOf()) return 1;
-    }
-    if(contextA == null && contextB != null) return 1;
-    if(contextA != null && contextB == null) return -1;
-    if(contextA != null && contextB != null){
-        if(contextA.valueOf() > contextB.valueOf()) return 1;
-        if(contextA.valueOf() < contextB.valueOf()) return -1;
+    for(let i = 0; i < sortingCriteria.length; i++) {
+        let criteria = sortingCriteria[i];
+        let result = criteria.compare(textA, textB);
+        if(i < sortingCriteria.length - 1 && result != 0) {
+            return result;
+        }
     }
     return 0;
+}
+
+function dateToString(date) {
+    if(date != null) {
+        return date.toISOString().substring(0,10);
+    }
+    return "";
 }
 
 function performSyntaxHighlighting() {
@@ -445,13 +631,8 @@ function itemNavigation(e) {
         DOWN_ARROW = 40,
         ENTER = 13,
         ESCAPE = 27;
-    if(todolist.children.length === 0) {
-        // showMessage("No tasks!", "error");
-        return false;
-    }
-    if(itemSelected && key >= 65 && key <= 90) {
-        // todo item key shortcuts
 
+    if(itemSelected && key >= 65 && key <= 90) {
         if(key == options.keyComplete.charCodeAt(0)) {
             toggleCompleteTodo(itemSelected);
         } else if(key == options.keyEdit.charCodeAt(0)) {
@@ -463,62 +644,30 @@ function itemNavigation(e) {
             itemSelected.classList.remove('selected');
             itemSelected = null;
         } else if(key == options.keyDelete.charCodeAt(0)) {
-            var prev = itemSelected.previousElementSibling;
-            var next = itemSelected.nextElementSibling;
+            var next = getNextItem(itemSelected);
+            let prev = getPreviousItem(itemSelected);
             deleteTodo(itemSelected);
-            
-            if(prev !== null && prev.parentNode.id === 'todolist') {
-                itemSelected = prev;
-                itemSelected.classList.add('selected');
-            } else if(next !== null && next.parentNode.id === 'todolist') {
-                itemSelected = next;
-                itemSelected.classList.add('selected');
-            } else {
-                itemSelected = document.querySelector('#todolist li');
-                if(itemSelected != null) {
-                    itemSelected.classList.add('selected');
-                } else {
-                    actionInput.focus();
-                }
-            }
-
+            itemSelected = prev || next;
         }
     } else if(key === ESCAPE) {
         if(itemSelected) {
             itemSelected.classList.remove('selected');
             itemSelected = undefined;
+            actionInput.focus();
         }
     } else if(key === DOWN_ARROW) {
-        actionInput.blur();
-        if(itemSelected) {
-            itemSelected.classList.remove('selected');
-            var next = itemSelected.nextElementSibling;
-            if(next !== null && next.parentNode.id === 'todolist') {
-                itemSelected = next;
-                itemSelected.classList.add('selected');
-            } else {
-                itemSelected = document.querySelector('#todolist li');
-                itemSelected.classList.add('selected');
-            }
-        } else {
-            itemSelected = document.querySelector('#todolist li');
-            itemSelected.classList.add('selected');
-            itemSelected.focus();
-        }
-    } else if(key == UP_ARROW) {
-        actionInput.blur();
-        if(itemSelected) {
-            itemSelected.classList.remove('selected');
-            var prev = itemSelected.previousElementSibling;
-            if(prev !== null && prev.parentNode.id === 'todolist') {
-                itemSelected = prev;
-                itemSelected.classList.add('selected');
-            } else {
-                itemSelected = undefined;
-                actionInput.focus();
-            }
+        itemSelected = getNextItem(itemSelected);
+        if(itemSelected != null) {
+            actionInput.blur();
         } else {
             actionInput.focus();
+        }
+    } else if(key == UP_ARROW) {
+        itemSelected = getPreviousItem(itemSelected);
+        if(itemSelected == null) {
+            actionInput.focus();
+        } else {
+            actionInput.blur();
         }
     } else if(key === ENTER) {
         if(itemSelected && itemSelected.classList.contains('selected')) {
@@ -528,4 +677,47 @@ function itemNavigation(e) {
         }
     }
     return true;
+}
+
+function getNextItem(itemSelected) {
+    let selector = ".item";
+    if(itemSelected == null) {
+        itemSelected = document.querySelector("#todolist " + selector) || null;
+        if(itemSelected != null) {
+            itemSelected.classList.add("selected");
+        }
+        return itemSelected;
+    }
+    itemSelected.classList.remove('selected');
+    let next = itemSelected.nextElementSibling;
+
+    while(next && next.parentNode.id == "todolist") {
+        if(next.matches(selector)) {
+            next.classList.add('selected');
+            return next;
+        }
+        next = next.nextElementSibling;
+    }
+    itemSelected = document.querySelector("#todolist " + selector) || null;
+    if(itemSelected != null) {
+        itemSelected.classList.add("selected");
+    }
+    return itemSelected;
+}
+
+function getPreviousItem(itemSelected) {
+    let selector = ".item";
+    if(itemSelected == null) {
+        return null;
+    }
+    itemSelected.classList.remove('selected');
+    let prev = itemSelected.previousElementSibling;
+    while(prev && prev.parentNode.id == "todolist") {
+        if(prev.matches(selector)) {
+            prev.classList.add('selected');
+            return prev;
+        }
+        prev = prev.previousElementSibling;
+    }
+    return null;
 }

@@ -7,6 +7,7 @@ const optionsDefault = {
         keyDelete: "D",
         keyNew: "N",
         keyFilter: "?",
+        dividerShow: false,
     }
 }
 browser.storage.onChanged = updateUI;
@@ -22,7 +23,11 @@ async function updateUI() {
     var optionElements = document.querySelectorAll("form input");
     for(let i = 0; i < optionElements.length; i++) {
         let val = options.options[optionElements[i].id];
-        optionElements[i].value = typeof val !== "undefined" ? val : optionsDefault.options[optionElements[i].id];
+        if(typeof val !== "undefined") {
+          optionElements[i][optionElements[i].type == "checkbox" ? "checked" : "value"] = val;
+        } else if(typeof optionsDefault.options[optionElements[i].id] !== "undefined") {
+          optionElements[i][optionElements[i].type == "checkbox" ? "checked" : "value"] = optionsDefault.options[optionElements[i].id];
+        }
     }
    
     let commands = await browser.commands.getAll();
@@ -32,9 +37,26 @@ async function updateUI() {
       }
     }
 }
+  async function resetDividerOptions() {
+    let options = await fetchOptions();
+    let dividerOptions = document.querySelectorAll(".dividerOptions input");
+    for(let i = 0; i < dividerOptions.length; i++) {
+        options.options[dividerOptions[i].id] = optionsDefault.options[dividerOptions[i].id];
+    }
+    await browser.storage.sync.set(options);
+  }
+
+  async function updateDividerOptions() {
+    let options = await fetchOptions();
+    let dividerOptions = document.querySelectorAll(".dividerOptions input");
+    for(let i = 0; i < dividerOptions.length; i++) {
+        options.options[dividerOptions[i].id] = dividerOptions[i].getAttribute("type") != "checkbox" ? dividerOptions[i].value : dividerOptions[i].checked;
+    }
+    await browser.storage.sync.set(options);
+  }
+
   // Update only the shortcut options
-  async function updateShortcuts(e) {
-    e.preventDefault();  
+  async function updateShortcutOptions() {
     let options = await fetchOptions();
     let shortcutOptions = document.querySelectorAll(".shortcutOptions input");
     for(let i = 0; i < shortcutOptions.length; i++) {
@@ -52,14 +74,13 @@ async function updateUI() {
   /**
    * Reset the shortcut and update the textbox.
    */
-  async function resetShortcuts(e) {
+  async function resetShortcutOptions() {
     let options = await fetchOptions();
     let shortcutOptions = document.querySelectorAll(".shortcutOptions input");
     for(let i = 0; i < shortcutOptions.length; i++) {
         options.options[shortcutOptions[i].id] = optionsDefault.options[shortcutOptions[i].id];
     }
     await browser.storage.sync.set(options);
-    e.preventDefault();  
     // commands.update not in Firefox v57 :(
     // await browser.commands.reset(commandName);
   }
@@ -87,11 +108,44 @@ async function updateUI() {
       return options;
   }
 
+async function handleReset(e) {
+  let form = e.target.parentNode;
+  e.preventDefault();
+  if(form.classList.contains("dividerOptions")) {
+    await resetDividerOptions();
+  } else if(form.classList.contains("shortcutOptions")) {
+    await resetShortcutOptions();
+  } else if(form.classList.contains("otherOptions")) {
+    console.log("TODO reset other options");
+  }
+  await browser.runtime.reload();
+}
+
+  async function handleSave(e) {
+    let form = e.target.parentNode;
+    e.preventDefault();
+    if(form.classList.contains("dividerOptions")) {
+      updateDividerOptions();
+    } else if(form.classList.contains("shortcutOptions")) {
+      updateShortcutOptions();
+    } else if(form.classList.contains("otherOptions")) {
+      console.log("TODO update other options");
+    }
+  }
+
   function setEventListeners() {
     document.addEventListener('DOMContentLoaded', updateUI);
-  
-    document.querySelector('#update').addEventListener('click', updateShortcuts);
-    document.querySelector('#reset').addEventListener('click', resetShortcuts);
+    
+    let saveButtons = document.querySelectorAll("form button.save");
+    let resetButtons = document.querySelectorAll("form button.reset");
+
+    for(let i = 0; i < saveButtons.length; i++) {
+      saveButtons[i].addEventListener('click', handleSave);
+    }
+    for(let i = 0; i < resetButtons.length; i++) {
+      resetButtons[i].addEventListener('click', handleReset);
+    }
+
     document.querySelector('#deleteTodos').addEventListener('click', clearLocalTodos);
     document.querySelector('#resetAll').addEventListener('click', resetEverything);  
   }
