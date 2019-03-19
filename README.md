@@ -34,5 +34,5 @@ A keyboard driven to-do list extension with the todo.txt methodology in mind.
  - Or search the addons store for the latest published version, which may not be up to date.
 
 ### Examples
-![ExampleUsage](https://github.com/dthigpen/todotxt-extension/blob/examples/examples/vid1.gif)
-![ExampleUsage](https://github.com/dthigpen/todotxt-extension/blob/examples/examples/img1.png)
+![ExampleUsage](https://github.com/dthigpen/todotxt-extension/blob/master/examples/vid1.gif)
+![ExampleUsage](https://github.com/dthigpen/todotxt-extension/blob/master/examples/img1.png)
