@@ -447,6 +447,7 @@ function updateTodo(text, index, saveAfterUpdate = true) {
 }
 function deleteTodo(item) {
     item.parentNode.removeChild(item);
+    saveTodos();
     sortTodos();
 }
 
