@@ -30,6 +30,12 @@
       "default_title": "todotxt",
       "default_popup": "popup/todolist.html"
     },
+
+    "sidebar_action": {
+      "default_title": "todo.txt",
+      "default_panel": "popup/todolist.html",
+      "default_icon": "assets/icons/check_box_white_48dp.png"
+    },
   
     "commands": {
       "_execute_browser_action" : {

@@ -33,10 +33,12 @@ html, body {
     width: 550px;
     font-family: 'Roboto', sans-serif;
     font-weight: 300;
+    margin: 0;
+    padding: 0;
 }
 
 body {
-    padding: 2px 0;
+    padding: 6px;
 }
 
 ol {
