@@ -295,20 +295,7 @@ function parseImportFile(e) {
 }
 
 function exportToFile() {
-    sortTodos();
-    let items = getTodoListItems() || [];
-    let data = [];
-    for(let i = 0; i < items.length; i++) {
-        let text = items[i].innerText + (i != items.length - 1 ? "\n" : "");
-        if(text.trim().length > 0) {
-            data.push(text);
-        }
-    }
-    let todofile = new Blob(data, {type: "text/plain"});
-    browser.downloads.download({
-        filename: exportFileName,
-        conflictAction: exportFileConflictAction,
-        url: URL.createObjectURL(todofile)});
+    browser.runtime.sendMessage({message: "exportToFile"});
 }
 
 function todoItemClicked(e) {
