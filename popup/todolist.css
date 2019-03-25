@@ -90,6 +90,7 @@ ol {
     background: none;
     padding: 0;
     margin: 0;
+    text-align: center;
 }
 
 #todolist li div.actions button.completeTodo {

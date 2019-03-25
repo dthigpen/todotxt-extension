@@ -60,10 +60,9 @@ async function updateUI() {
     let options = await fetchOptions();
     let shortcutOptions = document.querySelectorAll(".shortcutOptions input");
     for(let i = 0; i < shortcutOptions.length; i++) {
-        options.options[shortcutOptions[i].id] = shortcutOptions[i].value;
+        options.options[shortcutOptions[i].id] = shortcutOptions[i].getAttribute("type") != "checkbox" ? shortcutOptions[i].value : shortcutOptions[i].checked;
     }
     await browser.storage.sync.set(options);
-    
     // commands.update not in Firefox v57 :(
     // await browser.commands.update({
     //   name: commandName,

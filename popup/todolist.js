@@ -272,26 +272,26 @@ function setEventListeners() {
     document.body.onkeyup = itemNavigation;
     actionInput.addEventListener("keyup", submitInput);
     actionInputBtn.addEventListener("click", parseActionInput);
-    fileImportBtn.addEventListener("change", importFromFile, false);
+    fileImportBtn.addEventListener("click", importFromFile);
     fileExportBtn.addEventListener("click", exportToFile);
     optionsBtn.addEventListener("click", () => browser.runtime.openOptionsPage());
     document.body.querySelector("#todolist").addEventListener("click", todoItemClicked);
     fileReader.addEventListener("loadend", parseImportFile);
+    browser.runtime.onMessage.addListener(request => {
+        if(request.message == "fileImport" && request.status == "success") {
+            loadTodos();
+        }
+    });
 }
 
 function importFromFile() {
-    console.log("Do import from file");
-    let todofile = this.files[0];
-    if(todofile) {
-        fileReader.readAsText(todofile);
-    }
+    browser.runtime.sendMessage({message: "chooseFile"});
 }
 
 function parseImportFile(e) {
     let text = e.srcElement.result || "";
     let texts = text.split("\n");
     saveTodoStrings(texts, true);
-    
 }
 
 function exportToFile() {
