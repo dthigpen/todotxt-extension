@@ -1,8 +1,3 @@
-fetchOptionsAsync();
-var options = {
-    openAsPopup: false
-}
-
 /* Boarding */
 browser.runtime.onInstalled.addListener(async ({reason, temporary }) => {
     // for development use
@@ -64,30 +59,4 @@ function saveTodoStrings(texts) {
             console.log(err);
         });
     }
-}
-
-/* Command listener */
-browser.commands.onCommand.addListener((command) => {
-    if(command === "toggle-todo-list") {
-        if(options.openAsPopup) {
-            browser.browserAction.openPopup();
-        } else {
-            browser.sidebarAction.open();
-            
-        }
-    }else
-    console.log(command);
-  });
-
-
-function fetchOptionsAsync() {
-    browser.storage.sync.get("options")
-    .then(res => {
-        if(typeof res === "undefined" || !res.hasOwnProperty("options")) {
-            res["options"] = optionsDefault;
-        }
-        options = res.options;
-        console.log(JSON.stringify(res.options));
-        return res.options;
-    });
 }
