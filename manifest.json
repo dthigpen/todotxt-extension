@@ -12,10 +12,12 @@
     "permissions": [
       "activeTab",
       "storage",
-      "notifications"
+      "notifications",
+      "downloads"
     ],
+    
     "background": {
-      "scripts": ["background/boarding.js"]
+      "scripts": ["background/background.js"]
     },
 
     "browser_action": {
@@ -28,7 +30,7 @@
       "default_title": "todotxt",
       "default_popup": "popup/todolist.html"
     },
-  
+
     "commands": {
       "_execute_browser_action" : {
         "suggested_key": {

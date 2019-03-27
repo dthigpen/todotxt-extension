@@ -33,10 +33,12 @@ html, body {
     width: 550px;
     font-family: 'Roboto', sans-serif;
     font-weight: 300;
+    margin: 0;
+    padding: 0;
 }
 
 body {
-    padding: 2px 0;
+    padding: 6px;
 }
 
 ol {
@@ -88,6 +90,7 @@ ol {
     background: none;
     padding: 0;
     margin: 0;
+    text-align: center;
 }
 
 #todolist li div.actions button.completeTodo {
@@ -118,18 +121,29 @@ ol {
 
 .input-area {
     display: grid;
-    grid-template-columns: 1fr auto auto;
+    grid-template-columns: 1fr repeat(4, auto);
     grid-gap: 4px;
     padding-bottom: 4px;
 }
 
-.input-area input, .input-area button {
+.input-area input, .input-area button, .file-upload {
     font-size: inherit;
     font-family: inherit;
     font-weight: inherit;
     border: 1px solid var(--gray);
     background: none;
     display: inline;
+    cursor: pointer;
+}
+
+input[type="file"] {
+    display: none;
+}
+
+.file-upload {
+    display: flex;
+    align-items: center;
+    padding: 0 8px;
 }
 
 .input-area input {

@@ -32,11 +32,17 @@ const htmlElem = document.querySelector("html");
 const bodyElem = document.querySelector("body");
 const actionInput = document.querySelector("#actioninput");
 const actionInputBtn = document.querySelector("#actioninputBtn");
+const fileImportBtn = document.querySelector("#fileImportBtn");
+const fileExportBtn = document.querySelector("#fileExportBtn");
 const optionsBtn = document.querySelector("#optionsBtn");
 const todolist = document.querySelector("#todolist");
 const message = document.querySelector("#message-box");
 const checkWindowWidthDelayMs = 100;
 const maxWidth = 550;
+const exportFileName = "todo.txt";
+const exportFileConflictAction = "overwrite";
+const fileReader = new FileReader();
+
 var options = optionsDefault;
 
 // Add method to access created keys
@@ -212,6 +218,7 @@ function fetchLocalTodos() {
 function loadTodos() {
     fetchLocalTodos()
     .then(texts => {
+        clearTodos();
         for(let i = 0; i < texts.length; i++) {
             addTodo(texts[i], false);
         }
@@ -221,24 +228,37 @@ function loadTodos() {
     });
 }
 
-function saveTodos() {
-    let todos = {
-        "items": [
-        ]
-    };
-    let elements = getTodoListItems();
-    if(typeof elements !== "undefined") {
-        for(let i = 0; i < elements.length; i++) {
-            todos.items.push(elements[i].innerText);
-        }
+function clearTodos() {
+    todolist.innerHTML = "";
+}
+
+function saveTodoStrings(texts, updateUIAfterSave = false) {
+    if(typeof texts !== "undefined" && texts.length > 0) {
+        let todos = {
+            "items": texts
+        };
         browser.storage.sync.set(todos)
         .then(() => {
             // success
+            if(updateUIAfterSave) {
+                loadTodos();
+            }
         })
         .catch(err => {
-            showMessage('Failed to load tasks', 'error');
+            showMessage('Failed to save tasks', 'error');
             console.log(err);
         });
+    }
+}
+
+function saveTodos() {
+    let items = [];
+    let elements = getTodoListItems();
+    if(typeof elements !== "undefined") {
+        for(let i = 0; i < elements.length; i++) {
+            items.push(elements[i].innerText);
+        }
+        saveTodoStrings(items);
     }
     updateBadgeText();
 }
@@ -252,8 +272,30 @@ function setEventListeners() {
     document.body.onkeyup = itemNavigation;
     actionInput.addEventListener("keyup", submitInput);
     actionInputBtn.addEventListener("click", parseActionInput);
+    fileImportBtn.addEventListener("click", importFromFile);
+    fileExportBtn.addEventListener("click", exportToFile);
     optionsBtn.addEventListener("click", () => browser.runtime.openOptionsPage());
     document.body.querySelector("#todolist").addEventListener("click", todoItemClicked);
+    fileReader.addEventListener("loadend", parseImportFile);
+    browser.runtime.onMessage.addListener(request => {
+        if(request.message == "fileImport" && request.status == "success") {
+            loadTodos();
+        }
+    });
+}
+
+function importFromFile() {
+    browser.runtime.sendMessage({message: "chooseFile"});
+}
+
+function parseImportFile(e) {
+    let text = e.srcElement.result || "";
+    let texts = text.split("\n");
+    saveTodoStrings(texts, true);
+}
+
+function exportToFile() {
+    browser.runtime.sendMessage({message: "exportToFile"});
 }
 
 function todoItemClicked(e) {
